@@ -1,0 +1,3 @@
+package secs
+
+trait Secs

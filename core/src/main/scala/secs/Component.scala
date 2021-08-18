@@ -1,0 +1,4 @@
+package secs
+
+trait Component
+
