@@ -1,10 +1,11 @@
 package secs
 
+import scala.Tuple.Map
 import scala.compiletime.*
 
 trait Component
 
-trait ComponentMeta[A <: Component]:
+trait ComponentMeta[A]:
   def name: String
 
 case class Dimension(width: Double, height: Double) extends Component
@@ -15,9 +16,18 @@ case class Heading(angle: Double) extends Component
 given ComponentMeta[Heading] with
   val name = "Heading"
 
-def test[A <: Component: ComponentMeta]: String =
-  summon[ComponentMeta[A]].name
+inline def toMetas[CS <: Tuple]: Map[CS, ComponentMeta] =
+  summonAll[Map[CS, ComponentMeta]]
+
+def toNames(cms: Tuple): List[String] =
+  cms match
+    case (c: ComponentMeta[?]) *: cs => c.name :: toNames(cs)
+    case x *: _                      => sys.error(s"invalid type: $x")
+    case _                           => Nil
+
+inline def query[CS <: Tuple]: List[String] =
+  toNames(toMetas[CS])
 
 @main
 def componentTest() =
-  println(test[Heading])
+  println(query[Dimension *: Heading *: EmptyTuple])

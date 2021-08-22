@@ -1,3 +1,5 @@
 package secs
 
-trait World
+trait World:
+
+  def components(name: String): Iterable[Component]
