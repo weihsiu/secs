@@ -5,8 +5,11 @@ import scala.compiletime.*
 
 trait Component
 
-trait ComponentMeta[A]:
+trait ComponentMeta[+A]:
   def name: String
+
+trait ComponentMetaMapper:
+  def map: PartialFunction[Component, ComponentMeta[Component]]
 
 case class Dimension(width: Double, height: Double) extends Component
 given ComponentMeta[Dimension] with
@@ -15,6 +18,11 @@ given ComponentMeta[Dimension] with
 case class Heading(angle: Double) extends Component
 given ComponentMeta[Heading] with
   val name = "Heading"
+
+given ComponentMetaMapper with
+  val map =
+    case _: Dimension => summon[ComponentMeta[Dimension]]
+    case _: Heading   => summon[ComponentMeta[Heading]]
 
 inline def toMetas[CS <: Tuple]: Map[CS, ComponentMeta] =
   summonAll[Map[CS, ComponentMeta]]
