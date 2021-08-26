@@ -3,7 +3,12 @@ val commonSettings = Seq(
   version := "0.1.0",
   scalacOptions ++= Seq(
     "-source:future"
-  )
+  ),
+  libraryDependencies ++= Seq(
+    "org.scalameta" %%% "munit" % "0.7.28" % Test
+  ),
+  Test / parallelExecution := false,
+  Test / testOptions += Tests.Argument(TestFrameworks.MUnit, "-b")
 )
 
 lazy val root = project
