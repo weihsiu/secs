@@ -13,7 +13,7 @@ class QuerySuite extends munit.FunSuite:
   val world = summon[World]
 
   test("testing") {
-    inline def system(using Q: Query1[(Dimension, Heading)]): Unit =
+    inline def system(using Q: Query1[(EntityC, Dimension, Heading)]): Unit =
       println(Q.result)
     val entity1 = world.spawnEntity()
     val entity2 = world.spawnEntity()

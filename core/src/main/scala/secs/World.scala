@@ -2,7 +2,7 @@ package secs
 
 trait World:
   def entitiesWith[C <: Component](using CM: ComponentMeta[C]): Set[Entity]
-  def componentsWithin(entity: Entity): Set[Component]
+  def componentsWithin[C <: Component](entity: Entity): Map[ComponentMeta[C], C]
   def spawnEntity(): Entity
   def despawnEntity(entity: Entity): Unit
   def insertComponent[C <: Component](entity: Entity, component: C)(using
@@ -22,12 +22,13 @@ given World with
   private var currentEntityId = 0
   def entitiesWith[C <: Component](using CM: ComponentMeta[C]) =
     components.get(CM).getOrElse(Set.empty)
-  def componentsWithin(entity: Entity) =
-    entities.get(entity).getOrElse(Map.empty).values.toSet
+  def componentsWithin[C <: Component](entity: Entity) =
+    entities.get(entity).getOrElse(Map.empty).asInstanceOf[Map[ComponentMeta[C], C]]
   def spawnEntity() =
     val entity = Entity(currentEntityId)
     entities += entity -> Map.empty
     currentEntityId += 1
+    insertComponent(entity, EntityC(entity))
     entity
   def despawnEntity(entity: Entity) =
     entities
