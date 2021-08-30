@@ -3,15 +3,15 @@ package secs
 import scala.Tuple.Map
 import scala.compiletime.*
 
-trait Component 
+trait Component
 
 trait ComponentMeta[+A]:
   def name: String
-  
+
 case class EntityC(entity: Entity) extends secs.Component
 given ComponentMeta[EntityC] with
   val name = "Entity"
-  
+
 case class Dimension(width: Double, height: Double) extends Component
 given ComponentMeta[Dimension] with
   val name = "Dimension"

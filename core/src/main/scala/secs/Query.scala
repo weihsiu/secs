@@ -4,7 +4,7 @@ import scala.Tuple.*
 import scala.compiletime.*
 
 trait Query[CS <: Tuple, FS <: Tuple]:
-  inline def result: List[List[Component]]
+  inline def result: List[CS]
 
 type Query1[CS <: Tuple] = Query[CS, EmptyTuple]
 
@@ -13,30 +13,33 @@ object Query:
     with
     type ToComponent[CM] = CM match
       case ComponentMeta[c] => c
+      case ?                => Unit
     type First[X <: Tuple] = X match
-      case x *: _ => x
+      case x *: ? => x
     type Rest[X <: Tuple] <: Tuple = X match
-      case _ *: xs => xs
+      case ? *: xs => xs
     private def toEntities(cms: Tuple): List[Set[Entity]] =
       cms match
         case (cm: ComponentMeta[? <: Component]) *: cms =>
           world.entitiesWith(using cm) :: toEntities(cms)
         case x *: _ => sys.error(s"invalid type: $x")
         case _      => Nil
-    // private inline def toComponents(entity: Entity, cms: Tuple): Tuple =
-    //   cms.map[ToComponent](
-    //     [cm] =>
-    //       (x: cm) =>
-    //         world.componentsWithin(entity)(
-    //           x.asInstanceOf[ComponentMeta[Component]]
-    //       )
-    //   )
-    private def toComponents(entity: Entity, cms: Tuple): List[Component] =
-      cms match
-        case (cm: ComponentMeta[? <: Component]) *: cms =>
-          world.componentsWithin(entity)(cm) :: toComponents(entity, cms)
-        case x *: _ => sys.error(s"invalid type: $x")
-        case _      => Nil
+    inline def toComponents(entity: Entity, cms: Tuple): Tuple =
+      cms.map[ToComponent](
+        [cm] =>
+          (x: cm) =>
+            world
+              .componentsWithin(entity)(
+                x.asInstanceOf[ComponentMeta[Component]]
+              )
+              .asInstanceOf[ToComponent[cm]]
+      )
+    // private def toComponents(entity: Entity, cms: Tuple): List[Component] =
+    //   cms match
+    //     case (cm: ComponentMeta[? <: Component]) *: cms =>
+    //       world.componentsWithin(entity)(cm) :: toComponents(entity, cms)
+    //     case x *: _ => sys.error(s"invalid type: $x")
+    //     case _      => Nil
     // inline def toComponents[CS <: Tuple](
     //     entity: Entity,
     //     cms: Tuple
@@ -52,4 +55,6 @@ object Query:
       val r = toEntities(summonAll[Map[CS, ComponentMeta]])
       r.reduce(_.intersect(_))
         .toList
-        .map(e => toComponents(e, summonAll[Map[CS, ComponentMeta]]))
+        .map(e =>
+          toComponents(e, summonAll[Map[CS, ComponentMeta]]).asInstanceOf[CS]
+        )

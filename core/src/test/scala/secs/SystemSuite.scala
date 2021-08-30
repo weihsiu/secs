@@ -15,7 +15,7 @@ class SystemSuite extends munit.FunSuite:
 
   inline def queryDimensions(using query: Query1[(EntityC, Dimension)]): Unit =
     val ds = query.result
-    println(s"ds = $ds")
+    ds.foreach(println)
     assertEquals(ds.length, 3)
 
   inline def updateDimensions(using
@@ -23,9 +23,9 @@ class SystemSuite extends munit.FunSuite:
       query: Query1[(EntityC, Dimension)]
   ): Unit =
     val css = query.result
-    css.foreach(cs =>
+    css.foreach((entityC, dimension) =>
       command
-        .entity(cs(0).asInstanceOf[EntityC].entity)
+        .entity(entityC.entity)
         .updateComponent[Dimension](d => d.copy(width = d.width * 2))
     )
 

@@ -2,7 +2,8 @@ package secs
 
 class TupleSuite extends munit.FunSuite:
   type Inner[F] = F match
-    case Option[x] => x
+    case Some[x]   => x
+    case None.type => Unit
 
   test("construct tuple") {
     assertEquals(1 *: 'a' *: true *: EmptyTuple, (1, 'a', true))
