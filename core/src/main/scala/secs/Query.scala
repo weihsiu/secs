@@ -14,10 +14,6 @@ object Query:
     type ToComponent[CM] = CM match
       case ComponentMeta[c] => c
       case ?                => Unit
-    type First[X <: Tuple] = X match
-      case x *: ? => x
-    type Rest[X <: Tuple] <: Tuple = X match
-      case ? *: xs => xs
     private def toEntities(cms: Tuple): List[Set[Entity]] =
       cms match
         case (cm: ComponentMeta[? <: Component]) *: cms =>
@@ -34,23 +30,6 @@ object Query:
               )
               .asInstanceOf[ToComponent[cm]]
       )
-    // private def toComponents(entity: Entity, cms: Tuple): List[Component] =
-    //   cms match
-    //     case (cm: ComponentMeta[? <: Component]) *: cms =>
-    //       world.componentsWithin(entity)(cm) :: toComponents(entity, cms)
-    //     case x *: _ => sys.error(s"invalid type: $x")
-    //     case _      => Nil
-    // inline def toComponents[CS <: Tuple](
-    //     entity: Entity,
-    //     cms: Tuple
-    // ): Tuple =
-    //   inline cms match
-    //     case (cm: ComponentMeta[? <: Component]) *: cms =>
-    //       world
-    //         .componentsWithin(entity)(cm)
-    //         .asInstanceOf[First[CS]] *: toComponents[Rest[CS]](entity, cms)
-    //     case x *: _ => error(s"invalid type: $x")
-    //     case _      => EmptyTuple
     inline def result =
       val r = toEntities(summonAll[Map[CS, ComponentMeta]])
       r.reduce(_.intersect(_))

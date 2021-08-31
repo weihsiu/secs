@@ -13,9 +13,9 @@ class SystemSuite extends munit.FunSuite:
     command.spawnEntity().insertComponent(Dimension(30, 40))
     command.spawnEntity().insertComponent(Heading(30))
 
-  inline def queryDimensions(using query: Query1[(EntityC, Dimension)]): Unit =
+  inline def queryDimensions(dimensions: Set[Dimension])(using query: Query1[Dimension *: EmptyTuple]): Unit =
     val ds = query.result
-    ds.foreach(println)
+    ds.foreach(d => assert(dimensions(d.head)))
     assertEquals(ds.length, 3)
 
   inline def updateDimensions(using
@@ -29,9 +29,17 @@ class SystemSuite extends munit.FunSuite:
         .updateComponent[Dimension](d => d.copy(width = d.width * 2))
     )
 
+  inline def queryHeadings(heading: Set[Heading])(using query: Query1[(EntityC, Heading)]): Unit =
+    ???
+
   test("system 1") {
     initialize
-    queryDimensions
+    queryDimensions(Set(Dimension(10, 20), Dimension(20, 30), Dimension(30, 40)))
     updateDimensions
-    queryDimensions
+    queryDimensions(Set(Dimension(20, 20), Dimension(40, 30), Dimension(60, 40)))
+  }
+
+  test("system 2") {
+    initialize
+
   }
