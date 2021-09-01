@@ -15,26 +15,20 @@ class FilterSuite extends munit.FunSuite:
     )
   import BoolOps.*
 
-  given [A <: Component: ComponentMeta]: ¬[A] =
-    ¬[A](summon[ComponentMeta[A]])
-
-  given [A <: Component: ComponentMeta, B <: Component: ComponentMeta]
-      : ∧[A, B] =
-    ∧[A, B](summon[ComponentMeta[A]], summon[ComponentMeta[B]])
-
-  given [A <: Component: ComponentMeta, B <: Component: ComponentMeta]
-      : ∨[A, B] =
-    ∨[A, B](summon[ComponentMeta[A]], summon[ComponentMeta[B]])
-
   trait Filter[OS <: BoolOps]:
     inline def boolOps: OS
 
   inline given [OS <: BoolOps]: Filter[OS] with
+    type NotInner[OS] = OS match
+      case ¬[? <: Component] => ???
+      case ¬[? <: BoolOps] => ???
     inline def toBoolOps[OS <: BoolOps]: BoolOps =
       inline erasedValue[OS] match
-        case _: ¬[Component] => ¬(summon[ComponentMeta[]])
-    inline def boolOps = ???
+        case _: ¬[? <: Component] => ¬(summonInline[ComponentMeta[NotInner[OS]]])
+        case _: ¬[? <: BoolOps] => toBoolOps[NotInner[OS]]
+    inline def boolOps = toBoolOps[OS].asInstanceOf[OS]
 
-  inline def filter[OS <: BoolOps](using F: Filter[OS]): Unit = ???
+  inline def filter[OS <: BoolOps](using F: Filter[OS]): Unit =
+    println(F.boolOps)
 
-  filter[¬[Dimension ∧ (Heading ∨ ¬[Rotation])]]
+  filter[¬[Heading]]
