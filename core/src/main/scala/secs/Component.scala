@@ -3,9 +3,9 @@ package secs
 import scala.Tuple.Map
 import scala.compiletime.*
 
-trait Component
+trait Component extends Matchable
 
-trait ComponentMeta[+A]
+trait ComponentMeta[+A] extends Matchable
 
 case class EntityC(entity: Entity) extends Component
 given ComponentMeta[EntityC] with {}
