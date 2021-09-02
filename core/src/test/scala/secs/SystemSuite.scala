@@ -1,6 +1,16 @@
 package secs
 
 class SystemSuite extends munit.FunSuite:
+
+  case class Dimension(width: Double, height: Double) extends Component
+  given ComponentMeta[Dimension] with {}
+
+  case class Heading(angle: Double) extends Component
+  given ComponentMeta[Heading] with {}
+
+  case class Rotation(angle: Double) extends Component
+  given ComponentMeta[Rotation] with {}
+
   inline def initialize(using command: Command): Unit =
     command
       .spawnEntity()
