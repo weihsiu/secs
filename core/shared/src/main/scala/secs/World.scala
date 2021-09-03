@@ -18,7 +18,7 @@ trait World:
       CM: ComponentMeta[C]
   ): Unit
   def sendEvent[E](event: E)(using CM: ComponentMeta[EventSender[E]]): Unit
-  def receiveEvents[E](using CM: ComponentMeta[EventSender[E]]): Iterable[E] 
+  def receiveEvents[E](using CM: ComponentMeta[EventSender[E]]): Iterable[E]
 
 given World with
   private var components = Map.empty[ComponentMeta[Component], Set[Entity]]
@@ -34,7 +34,10 @@ given World with
     components.get(CM).getOrElse(Set.empty)
 
   def componentsWithin[C <: Component](entity: Entity) =
-    entities.get(entity).getOrElse(Map.empty).asInstanceOf[Map[ComponentMeta[C], C]]
+    entities
+      .get(entity)
+      .getOrElse(Map.empty)
+      .asInstanceOf[Map[ComponentMeta[C], C]]
 
   def spawnEntity() =
     val entity = Entity(currentEntityId)
@@ -85,7 +88,9 @@ given World with
     }
 
   def sendEvent[E](event: E)(using CM: ComponentMeta[EventSender[E]]) =
-    events = events.updatedWith(CM)(_.fold(Some(Queue(event)))(es => Some(es.enqueue(event))))
+    events = events.updatedWith(CM)(
+      _.fold(Some(Queue(event)))(es => Some(es.enqueue(event)))
+    )
 
   def receiveEvents[E](using CM: ComponentMeta[EventSender[E]]) =
     events.get(CM).fold(Iterable.empty)(_.asInstanceOf[Queue[E]].toIterable)

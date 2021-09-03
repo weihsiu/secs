@@ -18,6 +18,7 @@ class CommandSuite extends munit.FunSuite:
   }
 
   test("insertComponent and removeComponent") {
-    val entity = command.spawnEntity().insertComponent(Dimension(10, 20)).insertComponent(Heading(10)).entity
+    val entity =
+      command.spawnEntity().insertComponent(Dimension(10, 20)).insertComponent(Heading(10)).entity
     command.despawnEntity(entity)
   }

@@ -28,7 +28,7 @@ inline given [OS <: BoolOps]: Filter[OS] with
     case ∨[x, ?] => x
   type OrSecondInner[OS] = OS match
     case ∨[?, x] => x
-    
+
   inline def toBoolOps[OS]: BoolOps =
     inline erasedValue[OS] match
       case _: ¬[? <: Component] =>
