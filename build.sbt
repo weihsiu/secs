@@ -16,7 +16,7 @@ lazy val root = project
   .aggregate(coreJS, coreJVM, examples)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Pure)
+  .crossType(CrossType.Full)
   .in(file("core"))
   .settings(commonSettings)
   .jsSettings()
