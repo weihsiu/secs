@@ -12,20 +12,26 @@ trait EntityCommand:
   def removeComponent[C <: Component]()(using CM: ComponentMeta[C]): EntityCommand
 
 object Command:
-  given (using world: World): Command with
+  given (using W: World): Command with
     private def entityCommand(e: Entity): EntityCommand = new EntityCommand:
       val entity = e
+
       def insertComponent[C <: Component](component: C)(using CM: ComponentMeta[C]) =
-        world.insertComponent(e, component)
+        W.insertComponent(e, component)
         this
+
       def updateComponent[C <: Component](update: C => C)(using CM: ComponentMeta[C]) =
-        world.updateComponent(e, update)
+        W.updateComponent(e, update)
         this
+        
       def removeComponent[C <: Component]()(using CM: ComponentMeta[C]) =
-        world.removeComponent[C](e)
+        W.removeComponent[C](e)
         this
+        
     def spawnEntity() =
-      val entity = world.spawnEntity()
+      val entity = W.spawnEntity()
       entityCommand(entity)
+
     def entity(entity: Entity) = entityCommand(entity)
-    def despawnEntity(entity: Entity) = world.despawnEntity(entity)
+
+    def despawnEntity(entity: Entity) = W.despawnEntity(entity)

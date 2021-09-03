@@ -28,6 +28,7 @@ inline given [OS <: BoolOps]: Filter[OS] with
     case ∨[x, ?] => x
   type OrSecondInner[OS] = OS match
     case ∨[?, x] => x
+    
   inline def toBoolOps[OS]: BoolOps =
     inline erasedValue[OS] match
       case _: ¬[? <: Component] =>
@@ -53,4 +54,5 @@ inline given [OS <: BoolOps]: Filter[OS] with
       case _: ∨[x, ? <: Component] =>
         ∨(toBoolOps[x], summonInline[ComponentMeta[OrSecondInner[OS]]])
       case _: ∨[x, y] => ∨(toBoolOps[x], toBoolOps[y])
+
   inline def boolOps = toBoolOps[OS].asInstanceOf[OS]
