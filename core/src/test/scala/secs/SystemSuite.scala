@@ -2,14 +2,11 @@ package secs
 
 class SystemSuite extends munit.FunSuite:
 
-  case class Dimension(width: Double, height: Double) extends Component
-  given ComponentMeta[Dimension] with {}
+  case class Dimension(width: Double, height: Double) extends Component derives ComponentMeta
 
-  case class Heading(angle: Double) extends Component
-  given ComponentMeta[Heading] with {}
+  case class Heading(angle: Double) extends Component derives ComponentMeta
 
-  case class Rotation(angle: Double) extends Component
-  given ComponentMeta[Rotation] with {}
+  case class Rotation(angle: Double) extends Component derives ComponentMeta
 
   inline def initialize(using command: Command): Unit =
     command
@@ -23,7 +20,9 @@ class SystemSuite extends munit.FunSuite:
     command.spawnEntity().insertComponent(Dimension(30, 40))
     command.spawnEntity().insertComponent(Heading(30))
 
-  inline def queryDimensions(dimensions: Set[Dimension])(using query: Query1[Dimension *: EmptyTuple]): Unit =
+  inline def queryDimensions(dimensions: Set[Dimension])(using
+      query: Query1[Dimension *: EmptyTuple]
+  ): Unit =
     val ds = query.result
     ds.foreach(d => assert(dimensions(d.head)))
     assertEquals(ds.length, 3)

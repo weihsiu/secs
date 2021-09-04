@@ -2,14 +2,11 @@ package secs
 
 class QuerySuite extends munit.FunSuite:
 
-  case class Dimension(width: Double, height: Double) extends Component
-  given ComponentMeta[Dimension] with {}
+  case class Dimension(width: Double, height: Double) extends Component derives ComponentMeta
 
-  case class Heading(angle: Double) extends Component
-  given ComponentMeta[Heading] with {}
+  case class Heading(angle: Double) extends Component derives ComponentMeta
 
-  case class Rotation(angle: Double) extends Component
-  given ComponentMeta[Rotation] with {}
+  case class Rotation(angle: Double) extends Component derives ComponentMeta
 
   val world = summon[World]
 

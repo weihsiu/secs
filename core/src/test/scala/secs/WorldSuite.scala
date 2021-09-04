@@ -2,13 +2,9 @@ package secs
 
 class WorldSuite extends munit.FunSuite:
 
-  case class Dimension(width: Double, height: Double) extends Component
-  given ComponentMeta[Dimension] with
-    val name = "Dimension"
+  case class Dimension(width: Double, height: Double) extends Component derives ComponentMeta
 
-  case class Heading(angle: Double) extends Component
-  given ComponentMeta[Heading] with
-    val name = "Heading"
+  case class Heading(angle: Double) extends Component derives ComponentMeta
 
   val world = summon[World]
 
@@ -25,10 +21,19 @@ class WorldSuite extends munit.FunSuite:
     val entity = world.spawnEntity()
     val dimension = Dimension(10, 20)
     world.insertComponent(entity, dimension)
-    assertEquals(world.componentsWithin(entity), Map(summon[ComponentMeta[EntityC]] -> EntityC(entity), summon[ComponentMeta[Dimension]] -> dimension))
+    assertEquals(
+      world.componentsWithin(entity),
+      Map(
+        summon[ComponentMeta[EntityC]] -> EntityC(entity),
+        summon[ComponentMeta[Dimension]] -> dimension
+      )
+    )
     assertEquals(world.entitiesWith[Dimension], Set(entity))
     world.removeComponent[Dimension](entity)
-    assertEquals(world.componentsWithin(entity), Map(summon[ComponentMeta[EntityC]] -> EntityC(entity)))
+    assertEquals(
+      world.componentsWithin(entity),
+      Map(summon[ComponentMeta[EntityC]] -> EntityC(entity))
+    )
     assertEquals(world.entitiesWith[Dimension], Set.empty)
     world.despawnEntity(entity)
   }
@@ -38,6 +43,12 @@ class WorldSuite extends munit.FunSuite:
     val dimension = Dimension(10, 20)
     world.insertComponent(entity, dimension)
     world.updateComponent[Dimension](entity, _.copy(width = 20))
-    assertEquals(world.componentsWithin(entity), Map(summon[ComponentMeta[EntityC]] -> EntityC(entity), summon[ComponentMeta[Dimension]] -> Dimension(20, 20)))
+    assertEquals(
+      world.componentsWithin(entity),
+      Map(
+        summon[ComponentMeta[EntityC]] -> EntityC(entity),
+        summon[ComponentMeta[Dimension]] -> Dimension(20, 20)
+      )
+    )
     world.despawnEntity(entity)
   }
