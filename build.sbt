@@ -1,3 +1,4 @@
+import org.scalajs.linker.interface.ModuleInitializer
 val commonSettings = Seq(
   scalaVersion := "3.0.1",
   version := "0.1.0",
@@ -29,4 +30,15 @@ lazy val examples = project
   .in(file("examples"))
   .enablePlugins(ScalaJSPlugin)
   .settings(commonSettings)
+  .settings(
+    scalaJSUseMainModuleInitializer := true,
+    // Compile / scalaJSMainModuleInitializer := Some(
+    //   ModuleInitializer
+    //     .mainMethod("secs.examples.asteroids.Asteroids", "main")
+    // ),
+    // Compile / mainClass := Some("secs.examples.asteroids.Asteroids"),
+    libraryDependencies ++= Seq(
+      ("org.scala-js" %%% "scalajs-dom" % "1.2.0").cross(CrossVersion.for3Use2_13)
+    )
+  )
   .dependsOn(coreJS)

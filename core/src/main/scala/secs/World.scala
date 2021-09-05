@@ -4,6 +4,7 @@ import scala.collection.immutable.{Iterable, Queue}
 
 trait World:
   def tick(): Unit
+  def allEntities(): Set[Entity]
   def entitiesWith[C <: Component](using CM: ComponentMeta[C]): Set[Entity]
   def componentsWithin[C <: Component](entity: Entity): Map[ComponentMeta[C], C]
   def spawnEntity(): Entity
@@ -29,6 +30,8 @@ given World with
 
   def tick() =
     events = Map.empty
+
+  def allEntities() = entities.keySet
 
   def entitiesWith[C <: Component](using CM: ComponentMeta[C]) =
     components.get(CM).getOrElse(Set.empty)
