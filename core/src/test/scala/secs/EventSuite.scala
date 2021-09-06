@@ -2,8 +2,8 @@ package secs
 
 class EventSuite extends munit.FunSuite:
   case class MissleLaunched(id: Int) derives EventSenderCM, EventReceiverCM
-  // given ComponentMeta[EventSender[MissleLaunched]] with {}
-  // given ComponentMeta[EventReceiver[MissleLaunched]] with {}
+  // given ComponentMeta[EventSender[MissleLaunched]]()
+  // given ComponentMeta[EventReceiver[MissleLaunched]]()
 
   test("ComponentMetas for same EventSender is the same") {
     assertEquals(
