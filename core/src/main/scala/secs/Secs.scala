@@ -1,27 +1,39 @@
 package secs
 
 import scala.Tuple.*
+import scala.collection.immutable
 import scala.compiletime.*
 
-type TupleOption[OT <: Tuple] <: Option[Tuple] = OT match
-  case Some[x] *: rest => Some[x *: TupleOption[rest]]
-  case None.type *: ?  => None.type
-def tupleOption[OT <: Tuple](ot: OT): Option[OT] = ot match
-  case Some(x) *: rest => Some(x *: tupleOption(rest))
-  case None *: ?       => None
-
 trait Secs:
-  extension (components: Map[ComponentMeta[Component], Component])
+  type ToOptionComponent[CM] = CM match
+    case ComponentMeta[c] => Option[c]
+
+  extension (components: immutable.Map[ComponentMeta[Component], Component])
     def getC[C <: Component: ComponentMeta]: Option[C] =
       components.get(summon[ComponentMeta[C]]).asInstanceOf[Option[C]]
+
     inline def getCs[CS <: Tuple]: Option[CS] =
-      val ocs = summonAll[Map[CS, ComponentMeta]].map[Option]([cm] => (x: cm) => components.get(x))
+      Tuples
+        .sequenceOptions(
+          summonAll[Map[CS, ComponentMeta]]
+            .map[ToOptionComponent](
+              [cm] =>
+                (x: cm) =>
+                  components
+                    .get(x.asInstanceOf[ComponentMeta[Component]])
+                    .asInstanceOf[ToOptionComponent[cm]]
+            )
+        )
+        .asInstanceOf[Option[CS]]
 
   type Worldly = World ?=> Unit
   def init(): Worldly
   def tick(): Worldly
   def beforeRender(): Unit
-  def renderEntity(entity: Entity, components: Map[ComponentMeta[Component], Component]): Unit
+  def renderEntity(
+      entity: Entity,
+      components: immutable.Map[ComponentMeta[Component], Component]
+  ): Unit
   def afterRender(): Unit
 
 object Secs:

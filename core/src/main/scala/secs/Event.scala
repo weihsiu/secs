@@ -6,10 +6,10 @@ case class EventSender[E]() extends Component:
 case class EventReceiver[E]() extends Component:
   def receive(using CM: ComponentMeta[EventSender[E]], W: World): Iterable[E] = W.receiveEvents
 
-trait EventSenderCM[A] extends ComponentMeta[EventSender[A]]
+trait EventSenderCM[E] extends ComponentMeta[EventSender[E]]
 object EventSenderCM:
-  def derived[A]: EventSenderCM[A] = new EventSenderCM[A] {}
+  def derived[E]: EventSenderCM[E] = new EventSenderCM[E] {}
 
-trait EventReceiverCM[A] extends ComponentMeta[EventReceiver[A]]
+trait EventReceiverCM[E] extends ComponentMeta[EventReceiver[E]]
 object EventReceiverCM:
-  def derived[A]: EventReceiverCM[A] = new EventReceiverCM[A] {}
+  def derived[E]: EventReceiverCM[E] = new EventReceiverCM[E] {}

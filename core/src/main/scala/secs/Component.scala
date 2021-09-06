@@ -12,3 +12,17 @@ object ComponentMeta:
   def derived[A]: ComponentMeta[A] = new ComponentMeta[A] {}
 
 case class EntityC(entity: Entity) extends Component derives ComponentMeta
+
+case class Label[L <: String]() extends Component
+object Label:
+  var metas = Map.empty[String, ComponentMeta[Label[?]]]
+  inline def componentMeta[L <: String]: ComponentMeta[Label[L]] =
+    metas
+      .get(constValue[L])
+      .fold({
+        val meta = new ComponentMeta[Label[L]] {}
+        metas = metas.updated(constValue[L], meta)
+        meta
+      })(m => m.asInstanceOf[ComponentMeta[Label[L]]])
+
+inline given [L <: String]: ComponentMeta[Label[L]] = Label.componentMeta[L]

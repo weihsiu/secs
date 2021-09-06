@@ -5,6 +5,13 @@ class EventSuite extends munit.FunSuite:
   // given ComponentMeta[EventSender[MissleLaunched]] with {}
   // given ComponentMeta[EventReceiver[MissleLaunched]] with {}
 
+  test("ComponentMetas for same EventSender is the same") {
+    assertEquals(
+      ComponentMeta[EventSender[MissleLaunched]],
+      ComponentMeta[EventSender[MissleLaunched]]
+    )
+  }
+
   test("event send and receive") {
     inline def fireMissle(using Q: Query1[(EntityC, EventSender[MissleLaunched])]): Unit =
       // fire missle

@@ -1,18 +1,18 @@
 package secs.examples.asteroids
 
 import org.scalajs.dom
-import secs.*
+import secs.{*, given}
 
 import scala.scalajs.js
 
 class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
-  case class Label(label: String) extends Component derives ComponentMeta
+  // case class Label(label: String) extends Component derives ComponentMeta
   case class Movement(x: Double, y: Double, heading: Double, speed: Double) extends Component
       derives ComponentMeta
 
   inline def setup(using C: Command): Unit =
     val t1 =
-      C.spawnEntity().insertComponent(Label("torpedo")).insertComponent(Movement(0, 0, 30, 3))
+      C.spawnEntity().insertComponent(Label["torpedo"]()).insertComponent(Movement(0, 0, 30, 3))
 
   inline def updateMovements(using C: Command, Q: Query1[(EntityC, Movement)]): Unit =
     Q.result.foreach((e, m) =>
@@ -37,8 +37,8 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
 
   def renderEntity(entity: Entity, components: Map[ComponentMeta[Component], Component]) =
     components
-      .getC[Movement]
-      .foreach(m =>
+      .getCs[(Label["torpedo"], Movement)]
+      .foreach((l, m) =>
         context.fillStyle = "white"
         context.fillRect(m.x, m.y, 2, 2)
       )

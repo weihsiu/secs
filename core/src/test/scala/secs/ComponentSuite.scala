@@ -10,3 +10,8 @@ class ComponentSuite extends munit.FunSuite:
     assertEquals(summon[ComponentMeta[Dimension]], summon[ComponentMeta[Dimension]])
     assertEquals(summon[ComponentMeta[Heading]], summon[ComponentMeta[Heading]])
   }
+
+  test("ComponentMeta for Labels") {
+    assertEquals(ComponentMeta[Label["hello"]], ComponentMeta[Label["hello"]])
+    assert(ComponentMeta[Label["hello"]] != ComponentMeta[Label["world"]])
+  }
