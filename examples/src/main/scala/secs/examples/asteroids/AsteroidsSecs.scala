@@ -24,9 +24,8 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
   inline def setup(using C: Command): Unit =
     C.spawnEntity()
       .insertComponent(Label["spaceship"](0))
-      .insertComponent(Movement(width / 2, height / 2, 0, 0))
-      .insertComponent(Direction(0))
-    C.spawnEntity().insertComponent(Label["torpedo"](0)).insertComponent(Movement(0, 0, 30, 3))
+      .insertComponent(Movement(width / 2, height / 2, -90, 0))
+      .insertComponent(Direction(-90))
     for i <- 0 to 4 do
       C.spawnEntity()
         .insertComponent(Label["asteroid"](i))
@@ -55,10 +54,14 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
             val (r, a) =
               polarAdd(
                 (m.speed, math.toRadians(m.heading)),
-                (0.03, math.toRadians(d.direction - 90))
+                (0.03, math.toRadians(d.direction))
               )
             m.copy(speed = r, heading = math.toDegrees(a))
           )
+      if Keyboard.keyDown(KeyCode.Space) then
+        C.spawnEntity()
+          .insertComponent(Label["torpedo"](0))
+          .insertComponent(Movement(m.x, m.y, d.direction, 3))
     )
 
   inline def updateMovements(using C: Command, Q: Query1[(EntityC, Movement)]): Unit =
@@ -90,12 +93,12 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
         context.translate(m.x, m.y)
         context.rotate(math.toRadians(d.direction))
         context.beginPath()
-        context.moveTo(0, -10)
-        context.lineTo(-5, 10)
-        context.moveTo(0, -10)
-        context.lineTo(5, 10)
-        context.moveTo(-3, 6)
-        context.lineTo(3, 6)
+        context.moveTo(10, 0)
+        context.lineTo(-10, 5)
+        context.moveTo(10, 0)
+        context.lineTo(-10, -5)
+        context.moveTo(-6, 3)
+        context.lineTo(-6, -3)
         context.stroke()
         context.restore()
       )
