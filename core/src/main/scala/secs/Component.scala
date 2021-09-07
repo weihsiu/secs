@@ -13,7 +13,7 @@ object ComponentMeta:
 
 case class EntityC(entity: Entity) extends Component derives ComponentMeta
 
-case class Label[L <: String]() extends Component
+case class Label[L <: String](id: Int) extends Component
 object Label:
   var metas = Map.empty[String, ComponentMeta[Label[?]]]
   inline def componentMeta[L <: String]: ComponentMeta[Label[L]] =
