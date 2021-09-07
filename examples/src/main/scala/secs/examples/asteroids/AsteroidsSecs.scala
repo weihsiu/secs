@@ -4,6 +4,7 @@ import org.scalajs.dom
 import secs.{*, given}
 
 import scala.scalajs.js
+import org.scalajs.dom.ext.KeyCode
 
 class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
   case class Direction(direction: Double) extends Component derives ComponentMeta
@@ -31,6 +32,18 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
           )
         )
 
+  inline def updateSpaceship(using
+      C: Command,
+      Q: Query1[(EntityC, Label["spaceship"], Direction, Movement)]
+  ): Unit =
+    Q.result.foreach((e, l, d, m) =>
+      if Keyboard.keyDown(KeyCode.Left) || Keyboard.keyDown(KeyCode.Right) then
+        C.entity(e.entity)
+          .updateComponent[Direction](d =>
+            Direction(if Keyboard.keyDown(KeyCode.Left) then d.direction - 2 else d.direction + 2)
+          )
+    )
+
   inline def updateMovements(using C: Command, Q: Query1[(EntityC, Movement)]): Unit =
     Q.result.foreach((e, m) =>
       var newX = m.x + math.cos(math.toRadians(m.heading)) * m.speed
@@ -44,6 +57,7 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
     setup
 
   def tick() =
+    updateSpaceship
     updateMovements
 
   def beforeRender() =
