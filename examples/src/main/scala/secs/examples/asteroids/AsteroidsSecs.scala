@@ -7,6 +7,13 @@ import scala.scalajs.js
 import org.scalajs.dom.ext.KeyCode
 
 class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
+  def polarAdd(p1: (Double, Double), p2: (Double, Double)): (Double, Double) =
+    import math.*
+    (
+      sqrt(p1._1 * p1._1 + p2._1 * p2._1 + 2 * p1._1 * p2._1 * cos(p2._2 - p1._2)),
+      p1._2 + atan2(p2._1 * sin(p2._2 - p1._2), p1._1 + p2._1 * cos(p2._2 - p1._2))
+    )
+
   case class Direction(direction: Double) extends Component derives ComponentMeta
   case class Movement(x: Double, y: Double, heading: Double, speed: Double) extends Component
       derives ComponentMeta
@@ -18,7 +25,7 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
     C.spawnEntity()
       .insertComponent(Label["spaceship"](0))
       .insertComponent(Movement(width / 2, height / 2, 0, 0))
-      .insertComponent(Direction(45))
+      .insertComponent(Direction(0))
     C.spawnEntity().insertComponent(Label["torpedo"](0)).insertComponent(Movement(0, 0, 30, 3))
     for i <- 0 to 4 do
       C.spawnEntity()
@@ -41,6 +48,16 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
         C.entity(e.entity)
           .updateComponent[Direction](d =>
             Direction(if Keyboard.keyDown(KeyCode.Left) then d.direction - 2 else d.direction + 2)
+          )
+      if Keyboard.keyDown(KeyCode.Up) then
+        C.entity(e.entity)
+          .updateComponent[Movement](m =>
+            val (r, a) =
+              polarAdd(
+                (m.speed, math.toRadians(m.heading)),
+                (0.03, math.toRadians(d.direction - 90))
+              )
+            m.copy(speed = r, heading = math.toDegrees(a))
           )
     )
 
