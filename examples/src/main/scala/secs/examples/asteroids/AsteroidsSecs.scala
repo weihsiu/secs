@@ -2,6 +2,7 @@ package secs.examples.asteroids
 
 import org.scalajs.dom
 import secs.{*, given}
+import secs.BoolOps.*
 
 import scala.scalajs.js
 import org.scalajs.dom.ext.KeyCode
@@ -14,6 +15,7 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
       p1._2 + atan2(p2._1 * sin(p2._2 - p1._2), p1._1 + p2._1 * cos(p2._2 - p1._2))
     )
 
+  case class CoolOff(time: Double) extends Component derives ComponentMeta
   case class EndOfLife(time: Double) extends Component derives ComponentMeta
   case class Direction(direction: Double) extends Component derives ComponentMeta
   case class Movement(x: Double, y: Double, heading: Double, speed: Double) extends Component
@@ -43,7 +45,7 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
       C: Command,
       Q: Query1[(EntityC, Label["spaceship"], Direction, Movement)]
   ): Unit =
-    Q.result.foreach((e, l, d, m) =>
+    Q.result.foreach((e, _, d, m) =>
       if Keyboard.keyDown(KeyCode.Left) || Keyboard.keyDown(KeyCode.Right) then
         C.entity(e.entity)
           .updateComponent[Direction](d =>
@@ -59,14 +61,27 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
               )
             m.copy(speed = r, heading = math.toDegrees(a))
           )
+    )
+
+  inline def fireTorpedo(
+      time: Double
+  )(using
+      C: Command,
+      Q: Query[(EntityC, Label["spaceship"], Direction, Movement), ¬[CoolOff]]
+  ): Unit =
+    Q.result.foreach((e, _, d, m) =>
       if Keyboard.keyDown(KeyCode.Space) then
+        C.entity(e.entity).insertComponent(CoolOff(time + 500))
         C.spawnEntity()
           .insertComponent(Label["torpedo"](0))
           .insertComponent(Movement(m.x, m.y, d.direction, 3))
           .insertComponent(EndOfLife(time + 2000))
     )
 
-  inline def removeEndOfLifes(
+  inline def removeCoolOffs(time: Double)(using C: Command, Q: Query1[(EntityC, CoolOff)]): Unit =
+    Q.result.foreach((e, c) => if c.time < time then C.entity(e.entity).removeComponent[CoolOff]())
+
+  inline def despawnEndOfLifes(
       time: Double
   )(using C: Command, Q: Query1[(EntityC, EndOfLife)]): Unit =
     Q.result.foreach((e, l) => if l.time < time then C.despawnEntity(e.entity))
@@ -85,7 +100,9 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
 
   def tick(time: Double) =
     updateSpaceship(time)
-    removeEndOfLifes(time)
+    fireTorpedo(time)
+    removeCoolOffs(time)
+    despawnEndOfLifes(time)
     updateMovements
 
   def beforeRender() =
