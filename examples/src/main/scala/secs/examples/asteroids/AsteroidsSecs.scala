@@ -14,6 +14,7 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
       p1._2 + atan2(p2._1 * sin(p2._2 - p1._2), p1._1 + p2._1 * cos(p2._2 - p1._2))
     )
 
+  case class EndOfLife(time: Double) extends Component derives ComponentMeta
   case class Direction(direction: Double) extends Component derives ComponentMeta
   case class Movement(x: Double, y: Double, heading: Double, speed: Double) extends Component
       derives ComponentMeta
@@ -38,7 +39,7 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
           )
         )
 
-  inline def updateSpaceship(using
+  inline def updateSpaceship(time: Double)(using
       C: Command,
       Q: Query1[(EntityC, Label["spaceship"], Direction, Movement)]
   ): Unit =
@@ -62,7 +63,13 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
         C.spawnEntity()
           .insertComponent(Label["torpedo"](0))
           .insertComponent(Movement(m.x, m.y, d.direction, 3))
+          .insertComponent(EndOfLife(time + 2000))
     )
+
+  inline def removeEndOfLifes(
+      time: Double
+  )(using C: Command, Q: Query1[(EntityC, EndOfLife)]): Unit =
+    Q.result.foreach((e, l) => if l.time < time then C.despawnEntity(e.entity))
 
   inline def updateMovements(using C: Command, Q: Query1[(EntityC, Movement)]): Unit =
     Q.result.foreach((e, m) =>
@@ -76,8 +83,9 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
   def init() =
     setup
 
-  def tick() =
-    updateSpaceship
+  def tick(time: Double) =
+    updateSpaceship(time)
+    removeEndOfLifes(time)
     updateMovements
 
   def beforeRender() =

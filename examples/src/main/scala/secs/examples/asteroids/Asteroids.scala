@@ -14,9 +14,9 @@ object Asteroids:
     canvas.height = height
     canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
 
-  def renderLoop(ticker: () => Unit): Unit =
-    dom.window.requestAnimationFrame(_ =>
-      ticker()
+  def renderLoop(ticker: Double => Unit): Unit =
+    dom.window.requestAnimationFrame(time =>
+      ticker(time)
       renderLoop(ticker)
     )
 

@@ -3,7 +3,7 @@ package secs
 import scala.collection.immutable.{Iterable, Queue}
 
 trait World:
-  def tick(): Unit
+  def tick(time: Double): Unit
   def allEntities(): Set[Entity]
   def entitiesWith[C <: Component](using CM: ComponentMeta[C]): Set[Entity]
   def componentsWithin[C <: Component](entity: Entity): Map[ComponentMeta[C], C]
@@ -28,7 +28,7 @@ given World with
   private var currentEntityId = 0
   private var events = Map.empty[ComponentMeta[EventSender[?]], Queue[?]]
 
-  def tick() =
+  def tick(time: Double) =
     events = Map.empty
 
   def allEntities() = entities.keySet

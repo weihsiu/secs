@@ -28,7 +28,7 @@ trait Secs:
 
   type Worldly = World ?=> Unit
   def init(): Worldly
-  def tick(): Worldly
+  def tick(time: Double): Worldly
   def beforeRender(): Unit
   def renderEntity(
       entity: Entity,
@@ -37,11 +37,11 @@ trait Secs:
   def afterRender(): Unit
 
 object Secs:
-  def start(secs: Secs)(using world: World): () => Unit =
+  def start(secs: Secs)(using world: World): Double => Unit =
     secs.init()
-    () =>
-      world.tick()
-      secs.tick()
+    time =>
+      world.tick(time)
+      secs.tick(time)
       secs.beforeRender()
       world.allEntities().foreach(e => secs.renderEntity(e, world.componentsWithin(e)))
       secs.afterRender()
