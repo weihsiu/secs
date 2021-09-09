@@ -43,14 +43,16 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
 
   inline def updateSpaceship(time: Double)(using
       C: Command,
-      Q: Query1[(EntityC, Label["spaceship"], Direction, Movement)]
+      Q: Query1[(EntityC, Label["spaceship"], Direction, Movement, Option[CoolOff])]
   ): Unit =
-    Q.result.foreach((e, _, d, m) =>
+    Q.result.foreach((e, _, d, m, cO) =>
+      // turn left / right
       if Keyboard.keyDown(KeyCode.Left) || Keyboard.keyDown(KeyCode.Right) then
         C.entity(e.entity)
           .updateComponent[Direction](d =>
             Direction(if Keyboard.keyDown(KeyCode.Left) then d.direction - 2 else d.direction + 2)
           )
+      // apply thrust
       if Keyboard.keyDown(KeyCode.Up) then
         C.entity(e.entity)
           .updateComponent[Movement](m =>
@@ -61,25 +63,16 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
               )
             m.copy(speed = r, heading = math.toDegrees(a))
           )
-    )
-
-  inline def fireTorpedo(
-      time: Double
-  )(using
-      C: Command,
-      Q: Query[(EntityC, Label["spaceship"], Direction, Movement), ¬[CoolOff]]
-  ): Unit =
-    Q.result.foreach((e, _, d, m) =>
-      if Keyboard.keyDown(KeyCode.Space) then
+      // fire torpedo
+      if Keyboard.keyDown(KeyCode.Space) && cO.isEmpty then
         C.entity(e.entity).insertComponent(CoolOff(time + 500))
         C.spawnEntity()
           .insertComponent(Label["torpedo"](0))
           .insertComponent(Movement(m.x, m.y, d.direction, 3))
           .insertComponent(EndOfLife(time + 2000))
+      // clean up CoolOff
+      cO.foreach(c => if c.time < time then C.entity(e.entity).removeComponent[CoolOff]())
     )
-
-  inline def removeCoolOffs(time: Double)(using C: Command, Q: Query1[(EntityC, CoolOff)]): Unit =
-    Q.result.foreach((e, c) => if c.time < time then C.entity(e.entity).removeComponent[CoolOff]())
 
   inline def despawnEndOfLifes(
       time: Double
@@ -100,8 +93,6 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
 
   def tick(time: Double) =
     updateSpaceship(time)
-    fireTorpedo(time)
-    removeCoolOffs(time)
     despawnEndOfLifes(time)
     updateMovements
 

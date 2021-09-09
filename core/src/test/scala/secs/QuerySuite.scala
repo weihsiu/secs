@@ -11,11 +11,14 @@ class QuerySuite extends munit.FunSuite:
   val world = summon[World]
 
   test("query 1") {
-    inline def system(using query: Query1[(EntityC, Dimension, Heading)]): Unit =
+    inline def system(using
+        query: Query1[(EntityC, Dimension, Option[Heading], Option[Rotation])]
+    ): Unit =
       assertEquals(query.result.length, 2)
-      query.result.foreach { (_, dimension, heading) =>
+      query.result.foreach { (_, dimension, heading, rotation) =>
         assertEquals(dimension, Dimension(10, 20))
-        assertEquals(heading, Heading(123))
+        assertEquals(heading, Some(Heading(123)))
+        assertEquals(rotation, None)
       }
     val entity1 = world.spawnEntity()
     val entity2 = world.spawnEntity()

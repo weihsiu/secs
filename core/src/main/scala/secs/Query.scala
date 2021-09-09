@@ -16,33 +16,56 @@ object Query:
       case Option[?] => false
       case ?         => true
 
-    type NoOptionCM[CM] = CM match
-      case ComponentMeta[Option[c]] => ComponentMeta[c]
-      case ComponentMeta[c]         => ComponentMeta[c]
+    // private def toEntities(cms: Tuple): List[Set[Entity]] =
+    //   cms match
+    //     case (cm: ComponentMeta[? <: Component]) *: cms =>
+    //       W.entitiesWith(using cm) :: toEntities(cms)
+    //     case x *: _ => sys.error(s"invalid type: $x")
+    //     case _      => Nil
 
-    type ToComponent[CM] = CM match
-      case ComponentMeta[c] => c
+    inline def toEntities[CS <: Tuple]: List[Set[Entity]] =
+      inline erasedValue[CS] match
+        case _: (c *: cs) =>
+          W.entitiesWith(using
+            summonInline[ComponentMeta[c]].asInstanceOf[ComponentMeta[Component]]
+          ) :: toEntities[cs]
+        case _ => Nil
 
-    private def toEntities(cms: Tuple): List[Set[Entity]] =
-      cms match
-        case (cm: ComponentMeta[? <: Component]) *: cms =>
-          W.entitiesWith(using cm) :: toEntities(cms)
-        case x *: _ => sys.error(s"invalid type: $x")
-        case _      => Nil
+    // type ToComponent[CM] = CM match
+    //   case ComponentMeta[c] => c
+    // inline def toComponents(entity: Entity, cms: Tuple): Tuple =
+    //   cms.map[ToComponent](
+    //     [cm] =>
+    //       (x: cm) =>
+    //         W.componentsWithin(entity)(x.asInstanceOf[ComponentMeta[Component]])
+    //           .asInstanceOf[ToComponent[cm]]
+    //   )
 
-    inline def toComponents(entity: Entity, cms: Tuple): Tuple =
-      cms.map[ToComponent](
-        [cm] =>
-          (x: cm) =>
-            x match
-              case _: ComponentMeta[Option[? <: Component]] =>
-                W.componentsWithin(entity)
-                  .get(summon[NoOptionCM[cm]].asInstanceOf[ComponentMeta[Component]])
-                  .asInstanceOf[ToComponent[cm]]
-              case _ =>
-                W.componentsWithin(entity)(x.asInstanceOf[ComponentMeta[Component]])
-                  .asInstanceOf[ToComponent[cm]]
-      )
+    // type ToComponentMeta[C] = C match
+    //   case Option[c] => ComponentMeta[c]
+    //   case ?         => ComponentMeta[C]
+    // inline def toComponents2[CS <: Tuple](entity: Entity, cms: Tuple): Tuple =
+    //   inline (cms, erasedValue[CS]) match
+    //     case (cm *: cms, _: (Option[?] *: cs)) =>
+    //       W.componentsWithin(entity)
+    //         .get(cm.asInstanceOf[ComponentMeta[Component]])
+    //         .asInstanceOf[Option[Component]] *: toComponents2[cs](entity, cms)
+    //     case (cm *: cms, _: (? *: cs)) =>
+    //       W.componentsWithin(entity)(cm.asInstanceOf[ComponentMeta[Component]])
+    //         .asInstanceOf[Component] *: toComponents2[cs](entity, cms)
+    //     case (EmptyTuple, _: EmptyTuple.type) => EmptyTuple
+
+    inline def toComponents[CS <: Tuple](entity: Entity): Tuple =
+      inline erasedValue[CS] match
+        case _: (Option[c] *: cs) =>
+          W.componentsWithin(entity)
+            .get(summonInline[ComponentMeta[c]].asInstanceOf[ComponentMeta[Component]])
+            .asInstanceOf[Option[Component]] *: toComponents[cs](entity)
+        case _: (c *: cs) =>
+          W.componentsWithin(entity)(
+            summonInline[ComponentMeta[c]].asInstanceOf[ComponentMeta[Component]]
+          ).asInstanceOf[Component] *: toComponents[cs](entity)
+        case _ => EmptyTuple
 
     private def validEntity(boolOps: BoolOps)(entity: Entity): Boolean =
       val cs = W.componentsWithin(entity)
@@ -65,8 +88,9 @@ object Query:
 
     inline def result =
       val boolOps = summon[Filter[OS]].boolOps
-      val r = toEntities(summonAll[Map[TFilter[CS, NotOption], ComponentMeta]])
+      // val r = toEntities(summonAll[Map[TFilter[CS, NotOption], ComponentMeta]])
+      val r = toEntities[TFilter[CS, NotOption]]
       r.reduce(_.intersect(_))
         .toList
         .filter(validEntity(boolOps))
-        .map(e => toComponents(e, summonAll[Map[CS, ComponentMeta]]).asInstanceOf[CS])
+        .map(e => toComponents[CS](e).asInstanceOf[CS])
