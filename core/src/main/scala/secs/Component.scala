@@ -24,5 +24,4 @@ object Label:
         metas = metas.updated(constValue[L], meta)
         meta
       })(m => m.asInstanceOf[ComponentMeta[Label[L]]])
-
 inline given [L <: String]: ComponentMeta[Label[L]] = Label.componentMeta[L]

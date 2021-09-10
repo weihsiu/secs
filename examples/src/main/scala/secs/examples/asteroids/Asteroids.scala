@@ -5,6 +5,7 @@ import org.scalajs.dom.html
 import org.scalajs.dom.raw.CanvasRenderingContext2D
 import scala.scalajs.js
 import secs.{*, given}
+import secs.examples.ui.*
 
 object Asteroids:
   def setup(width: Int, height: Int): CanvasRenderingContext2D =
@@ -14,14 +15,9 @@ object Asteroids:
     canvas.height = height
     canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
 
-  def renderLoop(ticker: Double => Unit): Unit =
-    dom.window.requestAnimationFrame(time =>
-      ticker(time)
-      renderLoop(ticker)
-    )
-
   def main(args: Array[String]): Unit =
     val context = setup(800, 600)
-    val secs = AsteroidsSecs(context)
+    val renderer = Renderer.htmlCanvasRenderer(context)
+    val secs = AsteroidsSecs(renderer)
     val ticker = Secs.start(secs)
-    renderLoop(ticker)
+    renderer.animateFrame(ticker)

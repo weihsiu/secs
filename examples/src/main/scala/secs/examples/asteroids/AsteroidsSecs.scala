@@ -3,11 +3,22 @@ package secs.examples.asteroids
 import org.scalajs.dom
 import secs.{*, given}
 import secs.BoolOps.*
+import secs.examples.ui.*
 
 import scala.scalajs.js
 import org.scalajs.dom.ext.KeyCode
 
-class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
+class AsteroidsSecs(renderer: Renderer) extends Secs:
+  val spaceshipSegments = List(
+    (10.0, 0.0, -10.0, 5.0),
+    (10.0, 0.0, -10.0, -5.0),
+    (-6.0, 3.0, -6.0, -3.0)
+  )
+  val flameSegments = List(
+    (-6.0, 3.0, -14.0, 0.0),
+    (-6.0, -3.0, -14.0, 0.0)
+  )
+
   def polarAdd(p1: (Double, Double), p2: (Double, Double)): (Double, Double) =
     import math.*
     (
@@ -15,14 +26,15 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
       p1._2 + atan2(p2._1 * sin(p2._2 - p1._2), p1._1 + p2._1 * cos(p2._2 - p1._2))
     )
 
+  case class FlameOn() extends Component derives ComponentMeta
   case class CoolOff(time: Double) extends Component derives ComponentMeta
   case class EndOfLife(time: Double) extends Component derives ComponentMeta
   case class Direction(direction: Double) extends Component derives ComponentMeta
   case class Movement(x: Double, y: Double, heading: Double, speed: Double) extends Component
       derives ComponentMeta
 
-  val width = context.canvas.width
-  val height = context.canvas.height
+  val width = renderer.width
+  val height = renderer.height
 
   inline def setup(using C: Command): Unit =
     C.spawnEntity()
@@ -34,8 +46,8 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
         .insertComponent(Label["asteroid"](i))
         .insertComponent(
           Movement(
-            math.random * context.canvas.width,
-            math.random * context.canvas.height,
+            math.random * width,
+            math.random * height,
             math.random * 360,
             1
           )
@@ -63,6 +75,8 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
               )
             m.copy(speed = r, heading = math.toDegrees(a))
           )
+          .insertComponent(FlameOn())
+      else C.entity(e.entity).removeComponent[FlameOn]()
       // fire torpedo
       if Keyboard.keyDown(KeyCode.Space) && cO.isEmpty then
         C.entity(e.entity).insertComponent(CoolOff(time + 500))
@@ -97,40 +111,21 @@ class AsteroidsSecs(context: dom.CanvasRenderingContext2D) extends Secs:
     updateMovements
 
   def beforeRender() =
-    context.fillStyle = "black"
-    context.fillRect(0, 0, context.canvas.width, context.canvas.height)
+    renderer.fillRect("black", 0, 0, width, height)
 
   def renderEntity(entity: Entity, components: Map[ComponentMeta[Component], Component]) =
     components
       .getCs[(Label["spaceship"], Movement, Direction)]
       .foreach((l, m, d) =>
-        context.save()
-        context.strokeStyle = "white"
-        context.translate(m.x, m.y)
-        context.rotate(math.toRadians(d.direction))
-        context.beginPath()
-        context.moveTo(10, 0)
-        context.lineTo(-10, 5)
-        context.moveTo(10, 0)
-        context.lineTo(-10, -5)
-        context.moveTo(-6, 3)
-        context.lineTo(-6, -3)
-        context.stroke()
-        context.restore()
+        renderer.strokePolygon(d.direction, "white", m.x, m.y, spaceshipSegments)
+        if components.contains(ComponentMeta[FlameOn]) then
+          renderer.strokePolygon(d.direction, "white", m.x, m.y, flameSegments)
       )
     components
       .getCs[(Label["torpedo"], Movement)]
-      .foreach((l, m) =>
-        context.fillStyle = "white"
-        context.fillRect(m.x - 1, m.y - 1, 3, 3)
-      )
+      .foreach((l, m) => renderer.fillRect("white", m.x - 1, m.y - 1, 3, 3))
     components
       .getCs[(Label["asteroid"], Movement)]
-      .foreach((l, m) =>
-        context.strokeStyle = "white"
-        context.beginPath()
-        context.arc(m.x, m.y, 30, 0, math.Pi * 2)
-        context.stroke()
-      )
+      .foreach((l, m) => renderer.strokeRect("white", m.x - 30, m.y - 30, 60, 60))
 
   def afterRender() = ()
