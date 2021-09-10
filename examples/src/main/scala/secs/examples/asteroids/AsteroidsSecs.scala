@@ -8,7 +8,7 @@ import secs.examples.ui.*
 import scala.scalajs.js
 import org.scalajs.dom.ext.KeyCode
 
-class AsteroidsSecs(renderer: Renderer) extends Secs:
+class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
   val spaceshipSegments = List(
     (10.0, 0.0, -10.0, 5.0),
     (10.0, 0.0, -10.0, -5.0),
@@ -59,13 +59,13 @@ class AsteroidsSecs(renderer: Renderer) extends Secs:
   ): Unit =
     Q.result.foreach((e, _, d, m, cO) =>
       // turn left / right
-      if Keyboard.keyDown(KeyCode.Left) || Keyboard.keyDown(KeyCode.Right) then
+      if keyboard.keyDown(KeyCode.Left) || keyboard.keyDown(KeyCode.Right) then
         C.entity(e.entity)
           .updateComponent[Direction](d =>
-            Direction(if Keyboard.keyDown(KeyCode.Left) then d.direction - 2 else d.direction + 2)
+            Direction(if keyboard.keyDown(KeyCode.Left) then d.direction - 2 else d.direction + 2)
           )
       // apply thrust
-      if Keyboard.keyDown(KeyCode.Up) then
+      if keyboard.keyDown(KeyCode.Up) then
         C.entity(e.entity)
           .updateComponent[Movement](m =>
             val (r, a) =
@@ -78,7 +78,7 @@ class AsteroidsSecs(renderer: Renderer) extends Secs:
           .insertComponent(FlameOn())
       else C.entity(e.entity).removeComponent[FlameOn]()
       // fire torpedo
-      if Keyboard.keyDown(KeyCode.Space) && cO.isEmpty then
+      if keyboard.keyDown(KeyCode.Space) && cO.isEmpty then
         C.entity(e.entity).insertComponent(CoolOff(time + 500))
         C.spawnEntity()
           .insertComponent(Label["torpedo"](0))

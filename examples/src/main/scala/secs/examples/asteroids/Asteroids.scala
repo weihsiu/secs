@@ -18,6 +18,6 @@ object Asteroids:
   def main(args: Array[String]): Unit =
     val context = setup(800, 600)
     val renderer = Renderer.htmlCanvasRenderer(context)
-    val secs = AsteroidsSecs(renderer)
+    val secs = AsteroidsSecs(Keyboard.htmlKeyboard, renderer)
     val ticker = Secs.start(secs)
     renderer.animateFrame(ticker)
