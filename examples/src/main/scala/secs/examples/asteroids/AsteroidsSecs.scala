@@ -83,7 +83,9 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
       p1._2 + atan2(p2._1 * sin(p2._2 - p1._2), p1._1 + p2._1 * cos(p2._2 - p1._2))
     )
 
-  case class TorpedoPos(x: Double, y: Double) derives EventSenderCM, EventReceiverCM
+  case class TorpedoPositions(entity: Entity, p1: (Double, Double), p2: (Double, Double))
+      derives EventSenderCM,
+        EventReceiverCM
 
   case class FlameOn() extends Component derives ComponentMeta
   case class CoolOff(time: Double) extends Component derives ComponentMeta
@@ -111,7 +113,7 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
           )
         )
         .insertComponent(Scale(scale))
-        .insertComponent(EventReceiver[TorpedoPos]())
+        .insertComponent(EventReceiver[TorpedoPositions]())
 
   def spawnDebris(command: Command, time: Double, x: Double, y: Double): Unit =
     for i <- 0 to 4 do
@@ -159,7 +161,7 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
           .insertComponent(Label["torpedo"](0))
           .insertComponent(Movement(m.x, m.y, d.direction, 3))
           .insertComponent(EndOfLife(time + 2000))
-          .insertComponent(EventSender[TorpedoPos]())
+          .insertComponent(EventSender[TorpedoPositions]())
       // clean up CoolOff
       cO.foreach(c => if c.time < time then C.entity(e.entity).removeComponent[CoolOff]())
     )
@@ -169,26 +171,38 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
   )(using C: Command, Q: Query1[(EntityC, EndOfLife)]): Unit =
     Q.result.foreach((e, l) => if l.time < time then C.despawnEntity(e.entity))
 
-  inline def updateMovements(using C: Command, Q: Query1[(EntityC, Movement)]): Unit =
-    Q.result.foreach((e, m) =>
+  inline def updateMovements(using
+      C: Command,
+      Q: Query1[(EntityC, Movement, Option[EventSender[TorpedoPositions]])]
+  ): Unit =
+    Q.result.foreach((e, m, sO) =>
       var newX = m.x + math.cos(math.toRadians(m.heading)) * m.speed
       var newY = m.y + math.sin(math.toRadians(m.heading)) * m.speed
+      // send TorpedoPositions before space wrapping
+      sO.foreach(s => s.send(TorpedoPositions(e.entity, (m.x, m.y), (newX, newY))))
       if newX < 0 then newX += width else if newX >= width then newX -= width
       if newY < 0 then newY += height else if newY >= height then newY -= height
       C.entity(e.entity).updateComponent[Movement](_.copy(x = newX, y = newY))
     )
 
-  inline def sendTorpedoPos(using Q: Query1[(EventSender[TorpedoPos], Movement)]): Unit =
-    Q.result.foreach((s, m) => s.send(TorpedoPos(m.x, m.y)))
+  // inline def sendTorpedoPos(using Q: Query1[(EventSender[TorpedoPos], Movement)]): Unit =
+  //   Q.result.foreach((s, m) => s.send(TorpedoPos(m.x, m.y)))
 
   inline def detectTorpedoHits(time: Double)(using
       C: Command,
-      Q: Query1[(EntityC, Label["asteroid"], EventReceiver[TorpedoPos], Movement, Scale)]
+      Q: Query1[(EntityC, Label["asteroid"], EventReceiver[TorpedoPositions], Movement, Scale)]
   ): Unit =
     Q.result.foreach((e, l, r, m, s) =>
       r.receive.foreach(p =>
-        if withinRect(p.x, p.y, boundingRect(m.x, m.y, s.scale, asteroidSegments(l.id))) then
+        // if withinRect(p.x, p.y, boundingRect(m.x, m.y, s.scale, asteroidSegments(l.id))) then
+        if Collisions.intersectRect(
+            boundingRect(m.x, m.y, s.scale, asteroidSegments(l.id)),
+            p.p1,
+            p.p2
+          )
+        then
           C.despawnEntity(e.entity)
+          C.despawnEntity(p.entity)
           spawnDebris(C, time, m.x, m.y)
           if s.scale > 1.0 then spawnAsteroids(C, s.scale / 2, Some((m.x, m.y)))
       )
@@ -201,8 +215,7 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
     updateSpaceship(time)
     despawnEndOfLifes(time)
     updateMovements
-    sendTorpedoPos
-    detectTorpedoHits(time)
+  // sendTorpedoPos
 
   def beforeRender() =
     renderer.fillRect("black", 0, 0, width, height)
@@ -228,3 +241,6 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
       .foreach((l, m) => renderer.fillRect("white", m.x, m.y, 2, 2))
 
   def afterRender() = ()
+
+  def tock(time: Double) =
+    detectTorpedoHits(time)

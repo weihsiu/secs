@@ -35,6 +35,7 @@ trait Secs:
       components: immutable.Map[ComponentMeta[Component], Component]
   ): Unit
   def afterRender(): Unit
+  def tock(time: Double): Worldly
 
 object Secs:
   def start(secs: Secs)(using world: World): Double => Unit =
@@ -45,3 +46,4 @@ object Secs:
       secs.beforeRender()
       world.allEntities().foreach(e => secs.renderEntity(e, world.componentsWithin(e)))
       secs.afterRender()
+      secs.tock(time)
