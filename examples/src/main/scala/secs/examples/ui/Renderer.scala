@@ -8,6 +8,7 @@ trait Renderer:
   def strokeRect(color: String, x: Double, y: Double, width: Double, height: Double): Unit
   def fillRect(color: String, x: Double, y: Double, width: Double, height: Double): Unit
   def strokePolygon(
+      scale: Double,
       angle: Double,
       color: String,
       x: Double,
@@ -29,6 +30,7 @@ object Renderer:
       context.fillRect(x, y, width, height)
 
     def strokePolygon(
+        scale: Double,
         angle: Double,
         color: String,
         x: Double,
@@ -38,12 +40,14 @@ object Renderer:
       context.save()
       context.strokeStyle = color
       context.translate(x, y)
+      context.scale(scale, scale)
       context.rotate(math.toRadians(angle))
       context.beginPath()
       segments.foreach((x1, y1, x2, y2) =>
         context.moveTo(x1, y1)
         context.lineTo(x2, y2)
       )
+      context.lineWidth /= scale
       context.stroke()
       context.restore()
 
