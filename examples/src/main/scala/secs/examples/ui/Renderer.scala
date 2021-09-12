@@ -51,6 +51,22 @@ object Renderer:
       context.stroke()
       context.restore()
 
+    // def strokePolygon(
+    //     scale: Double,
+    //     angle: Double,
+    //     color: String,
+    //     x: Double,
+    //     y: Double,
+    //     segments: List[(Double, Double, Double, Double)]
+    // ) =
+    //   val r = if segments.length < 4 then 10 else 8 * scale
+    //   context.strokeStyle = color
+    //   context.fillStyle = color
+    //   context.fillRect(x + 50, y, 2, 2)
+    //   context.beginPath()
+    //   context.arc(x, y, r, 0, math.Pi * 2)
+    //   context.stroke()
+
     def animateFrame(frame: Double => Unit) =
       dom.window.requestAnimationFrame(time =>
         frame(time)

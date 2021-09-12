@@ -19,7 +19,7 @@ object Collisions:
     (o3 == 0 && onSegment(p2, p1, q2)) ||
     (o4 == 0 && onSegment(p2, q1, q2))
 
-  def intersectRect(rect: (Double, Double, Double, Double), p: Point, q: Point): Boolean =
+  def intersectSegment(rect: (Double, Double, Double, Double), p: Point, q: Point): Boolean =
     val r1 = (rect._1, rect._2) // bottom left
     val r2 = (rect._1, rect._4) // top left
     val r3 = (rect._3, rect._4) // top right
@@ -30,3 +30,9 @@ object Collisions:
     intersectSegments(r4, r1, p, q) ||
     (p._1 >= rect._1 && p._2 >= rect._2 && p._1 <= rect._3 && p._2 <= rect._4 &&
       q._1 >= rect._1 && q._2 >= rect._2 && q._1 <= rect._3 && q._2 <= rect._4)
+
+  def intersectRects(
+      rect1: (Double, Double, Double, Double),
+      rect2: (Double, Double, Double, Double)
+  ): Boolean =
+    rect1._1 < rect2._3 && rect1._3 > rect2._1 && rect1._2 < rect2._4 && rect1._4 > rect2._2
