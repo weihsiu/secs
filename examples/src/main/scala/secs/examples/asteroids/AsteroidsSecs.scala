@@ -169,7 +169,7 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
       cO.foreach(c => if c.time < time then C.entity(e.entity).removeComponent[CoolOff]())
     )
 
-  inline def despawnEndOfLifes(
+  inline def despawnEndOfLives(
       time: Double
   )(using C: Command, Q: Query1[(EntityC, EndOfLife)]): Unit =
     Q.result.foreach((e, l) => if l.time < time then C.despawnEntity(e.entity))
@@ -243,7 +243,7 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
 
   def tick(time: Double) =
     updateSpaceship(time)
-    despawnEndOfLifes(time)
+    despawnEndOfLives(time)
     updateMovements
     detectTorpedoHits(time)
     detectSpaceshipCollision(time)
@@ -254,26 +254,26 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
 
   def renderEntity(entity: Entity, components: Map[ComponentMeta[Component], Component]) =
     components
-      .getCs[(Label["spaceship"], Movement, Direction)]
+      .getComponents[(Label["spaceship"], Movement, Direction)]
       .foreach((l, m, d) =>
         renderer.strokePolygon(1, d.direction, "white", m.pos._1, m.pos._2, spaceshipSegments)
         components
-          .getC[FlameOn]
+          .getComponent[FlameOn]
           .foreach(_ =>
             renderer.strokePolygon(1, d.direction, "white", m.pos._1, m.pos._2, flameSegments)
           )
       )
     components
-      .getCs[(Label["torpedo"], Movement)]
+      .getComponents[(Label["torpedo"], Movement)]
       .foreach((l, m) => renderer.fillRect("white", m.pos._1 - 1, m.pos._2 - 1, 3, 3))
     components
-      .getCs[(Label["asteroid"], Movement, Scale)]
+      .getComponents[(Label["asteroid"], Movement, Scale)]
       .foreach((l, m, s) =>
         renderer
           .strokePolygon(s.scale, 0, "white", m.pos._1, m.pos._2, asteroidSegments(l.id))
       )
     components
-      .getCs[(Label["debris"], Movement)]
+      .getComponents[(Label["debris"], Movement)]
       .foreach((l, m) => renderer.fillRect("white", m.pos._1, m.pos._2, 2, 2))
 
   def afterRender() = ()

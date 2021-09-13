@@ -9,10 +9,10 @@ trait Secs:
     case ComponentMeta[c] => Option[c]
 
   extension (components: immutable.Map[ComponentMeta[Component], Component])
-    def getC[C <: Component: ComponentMeta]: Option[C] =
+    def getComponent[C <: Component: ComponentMeta]: Option[C] =
       components.get(summon[ComponentMeta[C]]).asInstanceOf[Option[C]]
 
-    inline def getCs[CS <: Tuple]: Option[CS] =
+    inline def getComponents[CS <: Tuple]: Option[CS] =
       Tuples
         .sequenceOptions(
           summonAll[Map[CS, ComponentMeta]]
