@@ -12,7 +12,7 @@ enum BoolOps:
       x: A | ComponentMeta[?],
       y: B | ComponentMeta[?]
   )
-import BoolOps.*
+export BoolOps.*
 
 trait Filter[OS <: BoolOps]:
   inline def boolOps: OS

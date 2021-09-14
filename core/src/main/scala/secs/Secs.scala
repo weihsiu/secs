@@ -4,14 +4,28 @@ import scala.Tuple.*
 import scala.collection.immutable
 import scala.compiletime.*
 
+trait Components:
+  def getComponent[C <: Component: ComponentMeta]: Option[C]
+
 trait Secs:
+  type Worldly = World ?=> Unit
+  def init(): Worldly
+  def tick(time: Double): Worldly
+  def beforeRender(): Unit
+  def renderEntity(entity: Entity, components: Components): Unit
+  def afterRender(): Unit
+
+object Secs:
+  class DefaultComponents(cs: immutable.Map[ComponentMeta[Component], Component])
+      extends Components:
+    val components = cs
+    def getComponent[C <: Component: ComponentMeta]: Option[C] =
+      cs.get(summon[ComponentMeta[C]]).asInstanceOf[Option[C]]
+
   type ToOptionComponent[CM] = CM match
     case ComponentMeta[c] => Option[c]
 
-  extension (components: immutable.Map[ComponentMeta[Component], Component])
-    def getComponent[C <: Component: ComponentMeta]: Option[C] =
-      components.get(summon[ComponentMeta[C]]).asInstanceOf[Option[C]]
-
+  extension (components: Components)
     inline def getComponents[CS <: Tuple]: Option[CS] =
       Tuples
         .sequenceOptions(
@@ -20,28 +34,23 @@ trait Secs:
               [cm] =>
                 (x: cm) =>
                   components
+                    .asInstanceOf[DefaultComponents]
+                    .components
                     .get(x.asInstanceOf[ComponentMeta[Component]])
                     .asInstanceOf[ToOptionComponent[cm]]
             )
         )
         .asInstanceOf[Option[CS]]
 
-  type Worldly = World ?=> Unit
-  def init(): Worldly
-  def tick(time: Double): Worldly
-  def beforeRender(): Unit
-  def renderEntity(
-      entity: Entity,
-      components: immutable.Map[ComponentMeta[Component], Component]
-  ): Unit
-  def afterRender(): Unit
-
-object Secs:
   def start(secs: Secs)(using world: World): Double => Unit =
     secs.init()
     time =>
       world.tick(time)
       secs.tick(time)
       secs.beforeRender()
-      world.allEntities().foreach(e => secs.renderEntity(e, world.componentsWithin(e)))
+      world
+        .allEntities()
+        .foreach(e => secs.renderEntity(e, DefaultComponents(world.componentsWithin(e))))
       secs.afterRender()
+
+export Secs.*

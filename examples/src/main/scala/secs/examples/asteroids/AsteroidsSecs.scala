@@ -2,7 +2,6 @@ package secs.examples.asteroids
 
 import org.scalajs.dom
 import secs.{*, given}
-import secs.BoolOps.*
 import secs.examples.ui.*
 
 import scala.scalajs.js
@@ -252,7 +251,7 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
   def beforeRender() =
     renderer.fillRect("black", 0, 0, width, height)
 
-  def renderEntity(entity: Entity, components: Map[ComponentMeta[Component], Component]) =
+  def renderEntity(entity: Entity, components: Components) =
     components
       .getComponents[(Label["spaceship"], Movement, Direction)]
       .foreach((l, m, d) =>
