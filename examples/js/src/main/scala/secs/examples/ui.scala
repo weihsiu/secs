@@ -2,6 +2,12 @@ package secs.examples.ui
 
 import org.scalajs.dom
 
+enum KeyCode(val value: Int):
+  case Space extends KeyCode(32)
+  case Left extends KeyCode(37)
+  case Up extends KeyCode(38)
+  case Right extends KeyCode(39)
+
 val htmlKeyboard = new Keyboard:
   private var downKeys = Set.empty[Int]
   dom.document.onkeydown = e => downKeys += e.keyCode

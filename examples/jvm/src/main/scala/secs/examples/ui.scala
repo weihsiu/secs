@@ -1,19 +1,25 @@
 package secs.examples.ui
 
 import scalafx.Includes.*
-import scalafx.scene.canvas.GraphicsContext
-import secs.examples.ui.Renderer
-import scalafx.scene.paint.Paint
 import scalafx.animation.AnimationTimer
 import scalafx.scene.Scene
+import scalafx.scene.canvas.GraphicsContext
 import scalafx.scene.input.{KeyCode as FxKeyCode}
+import scalafx.scene.paint.Paint
+import secs.examples.ui.Renderer
+
+enum KeyCode(val value: FxKeyCode):
+  case Space extends KeyCode(FxKeyCode.Space)
+  case Left extends KeyCode(FxKeyCode.Left)
+  case Up extends KeyCode(FxKeyCode.Up)
+  case Right extends KeyCode(FxKeyCode.Right)
 
 def scalafxKeyboard(scene: Scene): Keyboard = new Keyboard:
   private var downKeys = Set.empty[FxKeyCode]
   scene.setOnKeyPressed(e => downKeys += e.getCode)
   scene.setOnKeyReleased(e => downKeys -= e.getCode)
 
-  def keyDown(keyCode: KeyCode): Boolean = downKeys(FxKeyCode.(keyCode.value))
+  def keyDown(keyCode: KeyCode): Boolean = downKeys(keyCode.value)
 
 def scalafxRenderer(context: GraphicsContext): Renderer = new Renderer:
   val width = context.getCanvas.getWidth
@@ -46,6 +52,8 @@ def scalafxRenderer(context: GraphicsContext): Renderer = new Renderer:
       context.lineTo(x2, y2)
     )
     context.lineWidth /= scale
+    context.closePath()
+    context.stroke = color;
     context.strokePath()
     context.restore()
 

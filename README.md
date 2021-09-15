@@ -154,22 +154,28 @@ To start the whole thing, call `Secs.start()`. it takes a `Secs` you implemented
 You might see `World` required as a context parameter in some of the APIs.  We won't be going into much details here.  It is an implementation detail and should not be a concern for you as an API user.
 
 ## Example: Asteroids
-I made an simple and imcomplete Asteroids game to demostrate features of SECS.  It currently runs in the browser using HTML's canvas API for screen rendering.  Yes, the core SECS is cross-built for both Scala and Scala.js, it it will work as a library for both JVM and Javascript.  I've abstrated the rendering and input parts of the program so it will be easy to port it to JavaFX if I have the time.
+I made an simple and imcomplete Asteroids game to demostrate features of SECS.  It currently runs in the browser using HTML's canvas API for screen rendering and as an application using Scalafx's canvas API.  And amazingly, both APIs are quite similar!  As the core SECS is cross-built for both Scala and Scala.js, it will work as a library for both JVM and Javascript.  I've abstrated the rendering and input parts of the program so it will be easy to port it to other rendering pipelines if you fancy (Indigo, anyone?).
 
-To run, `examples/fastLinkJS` in sbt to generate the necessary artifacts, then point your browser to `web/index.html`.  Left/right keys to turn, up key to accelerate, and space key to fire.
+To run in a browser, `examplesJS/fastLinkJS` in sbt to generate the necessary artifacts, then point your browser to `web/index.html`.
+
+To run as an application, `examplesJVM/run` in sbt.
+
+Controls are quite simple as well: left/right keys to turn, up key to accelerate, and space key to fire.
 
 ![Asteroids image](asteroids.png)
 
 Some technical details worth mentioning:
 
 ### UI abstration
-Both the rendering and keyboard input APIs are abstracted to facilitate easier multiplatform implementation later on.
+Both the rendering and keyboard input APIs are abstracted to facilitate easier multiplatform implementation later on.  Pay particular attention to `animateFrame()` in `Secs`, the animation frames are expected to start after this method is called (if you are implementing another rendering pipeline).
 
 ### Events
-Both `TorpedoPoation` and `SpaceshipPosition` events are sent by the `EventSender` in torpedo and spaceship entities respectively.  These events are sent so that `EventReceiver` later on can process the events and detect if there were any collisions.
+Both `TorpedoPoation` and `SpaceshipPosition` events are sent by the `EventSender` in torpedo and spaceship entities respectively.  These events are sent so that `EventReceiver` in asteroids later on can process the events and detect if there were any collisions.  The order of calling system functions in `tick()` do matter so make sure you get them ordered correctly.
 
 ```scala
 case class TorpedoPosition(entity: Entity, pos: (Double, Double)) derives EventSenderCM, EventReceiverCM
 case class SpaceshipPosition(entity: Entity, pos: (Double, Double)) derives EventSenderCM, EventReceiverCM
 ```
 
+## Conclusion
+Happy hacking!!
