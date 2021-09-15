@@ -96,6 +96,7 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
 
   case class NewSpaceship(time: Double) extends Component derives ComponentMeta
   case class FlameOn() extends Component derives ComponentMeta
+  case class Hyperspace(time: Double) extends Component derives ComponentMeta
   case class CoolOff(time: Double) extends Component derives ComponentMeta
   case class EndOfLife(time: Double) extends Component derives ComponentMeta
   case class Direction(direction: Double) extends Component derives ComponentMeta
@@ -161,6 +162,11 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
           )
           .insertComponent(FlameOn())
       else C.entity(e.entity).removeComponent[FlameOn]()
+      // hyperspace
+      if keyboard.keyDown(KeyCode.Down) then
+        C.entity(e.entity)
+          .updateComponent[Movement](_.copy(pos = (math.random() * width, math.random() * height)))
+          .insertComponent(Hyperspace(time + 200))
       // fire torpedo
       if keyboard.keyDown(KeyCode.Space) && cO.isEmpty then
         C.entity(e.entity).insertComponent(CoolOff(time + 500))
@@ -178,18 +184,19 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
   )(using C: Command, Q: Query1[(EntityC, EndOfLife)]): Unit =
     Q.result.foreach((e, l) => if l.time < time then C.despawnEntity(e.entity))
 
-  inline def updateMovements(using
+  inline def updateMovements(time: Double)(using
       C: Command,
       Q: Query1[
         (
             EntityC,
             Movement,
+            Option[Hyperspace],
             Option[EventSender[TorpedoPosition]],
             Option[EventSender[SpaceshipPosition]]
         )
       ]
   ): Unit =
-    Q.result.foreach((e, m, sO1, sO2) =>
+    Q.result.foreach((e, m, hO, sO1, sO2) =>
       var newPos = (
         m.pos._1 + math.cos(math.toRadians(m.heading)) * m.speed,
         m.pos._2 + math.sin(math.toRadians(m.heading)) * m.speed
@@ -204,7 +211,9 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
       )
       C.entity(e.entity).updateComponent[Movement](_.copy(pos = newPos))
       sO1.foreach(_.send(TorpedoPosition(e.entity, newPos)))
-      sO2.foreach(_.send(SpaceshipPosition(e.entity, newPos)))
+      hO.fold(sO2.foreach(_.send(SpaceshipPosition(e.entity, newPos))))(h =>
+        if h.time < time then C.entity(e.entity).removeComponent[Hyperspace]()
+      )
     )
 
   inline def detectTorpedoHits(time: Double)(using
@@ -248,7 +257,7 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
   def tick(time: Double) =
     updateSpaceship(time)
     despawnEndOfLives(time)
-    updateMovements
+    updateMovements(time)
     detectTorpedoHits(time)
     detectSpaceshipCollision(time)
     newSpaceship(time)
@@ -260,12 +269,13 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
     components
       .getComponents[(Label["spaceship"], Movement, Direction)]
       .foreach((l, m, d) =>
-        renderer.strokePolygon(1, d.direction, "white", m.pos._1, m.pos._2, spaceshipSegments)
-        components
-          .getComponent[FlameOn]
-          .foreach(_ =>
-            renderer.strokePolygon(1, d.direction, "white", m.pos._1, m.pos._2, flameSegments)
-          )
+        if components.getComponent[Hyperspace].isEmpty then
+          renderer.strokePolygon(1, d.direction, "white", m.pos._1, m.pos._2, spaceshipSegments)
+          components
+            .getComponent[FlameOn]
+            .foreach(_ =>
+              renderer.strokePolygon(1, d.direction, "white", m.pos._1, m.pos._2, flameSegments)
+            )
       )
     components
       .getComponents[(Label["torpedo"], Movement)]

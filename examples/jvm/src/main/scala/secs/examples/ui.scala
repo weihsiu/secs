@@ -13,6 +13,7 @@ enum KeyCode(val value: FxKeyCode):
   case Left extends KeyCode(FxKeyCode.Left)
   case Up extends KeyCode(FxKeyCode.Up)
   case Right extends KeyCode(FxKeyCode.Right)
+  case Down extends KeyCode(FxKeyCode.Down)
 
 def scalafxKeyboard(scene: Scene): Keyboard = new Keyboard:
   private var downKeys = Set.empty[FxKeyCode]

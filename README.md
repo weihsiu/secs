@@ -160,14 +160,14 @@ To run in a browser, `examplesJS/fastLinkJS` in sbt to generate the necessary ar
 
 To run as an application, `examplesJVM/run` in sbt.
 
-Controls are quite simple as well: left/right keys to turn, up key to accelerate, and space key to fire.
+Controls are quite simple as well: **left/right** keys to turn, **up** key to accelerate, **down** key to hyperspace, and **space** key to fire.
 
 ![Asteroids image](asteroids.png)
 
 Some technical details worth mentioning:
 
 ### UI abstration
-Both the rendering and keyboard input APIs are abstracted to facilitate easier multiplatform implementation later on.  Pay particular attention to `animateFrame()` in `Secs`, the animation frames are expected to start after this method is called (if you are implementing another rendering pipeline).
+Both the rendering and keyboard input APIs are abstracted to facilitate easier multiplatform implementation later on.  Pay particular attention to `animateFrame()` in `Secs`, the animation frames are expected to start after this method is called (if you are using some other rendering pipeline).
 
 ### Events
 Both `TorpedoPoation` and `SpaceshipPosition` events are sent by the `EventSender` in torpedo and spaceship entities respectively.  These events are sent so that `EventReceiver` in asteroids later on can process the events and detect if there were any collisions.  The order of calling system functions in `tick()` do matter so make sure you get them ordered correctly.

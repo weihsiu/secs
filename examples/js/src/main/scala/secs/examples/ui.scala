@@ -1,12 +1,14 @@
 package secs.examples.ui
 
 import org.scalajs.dom
+import org.scalajs.dom.ext.{KeyCode as HKeyCode}
 
 enum KeyCode(val value: Int):
-  case Space extends KeyCode(32)
-  case Left extends KeyCode(37)
-  case Up extends KeyCode(38)
-  case Right extends KeyCode(39)
+  case Space extends KeyCode(HKeyCode.Space)
+  case Left extends KeyCode(HKeyCode.Left)
+  case Up extends KeyCode(HKeyCode.Up)
+  case Right extends KeyCode(HKeyCode.Right)
+  case Down extends KeyCode(HKeyCode.Down)
 
 val htmlKeyboard = new Keyboard:
   private var downKeys = Set.empty[Int]
@@ -47,6 +49,7 @@ def htmlCanvasRenderer(context: dom.CanvasRenderingContext2D): Renderer = new Re
       context.lineTo(x2, y2)
     )
     context.lineWidth /= scale
+    context.closePath()
     context.stroke()
     context.restore()
 
