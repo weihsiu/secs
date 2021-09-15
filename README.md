@@ -23,6 +23,22 @@ Components in SECS are simply normal case classes that extends `Component` (mark
 case class Dimension(width: Double, height: Double) extends Component derives ComponentMeta
 ```
 
+There are a couple of builtin components which is described below:
+
+### EntityC
+`EntityC` is a component that wraps the entity of selected components in the tuple.  It is useful when you want to get to the entity of the selected components, so you can insert/update/remove components on it.  `EntityC` is added automatically to each newly spawned entity, so you don't need to add it yourselves.
+
+```scala
+case class EntityC(entity: Entity) extends Component derives ComponentMeta
+```
+
+### Label
+`Label` component is used to precisicely query a set of entities.  It has a String type parameter which is used to identify it at the type level so we can use it in our query calculations.  The `id` parameter can be used to differentiate between different entity instances of the same label.
+
+```scala
+case class Label[L <: String](id: Int) extends Component
+```
+
 ## System
 System in SECS are just normal Scala functions.  They are required to be inlined since we are doing some type level trickery to get the necessary information at compile time.  They use using clause to summon both `Command` and `Query` (more on them later) to provide the abilities to view and manipulate components.  I didn't follow the design decision in Bevy to structure systems more rigidly (having API to register them, for instance), instead you are just writing normal functions and use normal scala syntax to compose them.  I think this is more intuitive and flexible.
 
@@ -93,13 +109,6 @@ inline def system(using query: Query[(EntityC, Dimension, Heading), ¬[Rotation]
 
 The above query will return a list of tuples of type (EntityC, Dimension, Heading) containing in entities which don't contain Rotation.
 
-### BTW, What is EntityC?
-`EntityC` is a component that wraps the entity of selected components in the tuple.  It is useful when you want to get to the entity of the selected components, so you can insert/update/remove components on it.  `EntityC` is added automatically to each newly spawned entity, so you don't need to add it yourselves.
-
-```scala
-case class EntityC(entity: Entity) extends Component derives ComponentMeta
-```
-
 ## Event
 The way SECS manages events is a little different than what Bevy does.  There are builtin components `EventSender[E]` and `EventReceiver[E]` where `E` is an arbitrary event type (case class) that derives both `EventSenderCM` and `EventReceiverCM`.  Entities can add `EventSender[E]` to send events of type `E` and `EventReceiver[E]` to receive events of type `E`.  Multiple entities can add the same `EventSender[E]` and send events to the event queue where they will be aggregated.  Every `EventReceiver[E]`, on the other hand, can receive the same events of type `E` from the same queue and process them.  The queue will only persist for one tick (animation frame).  So after each tick, all the event queues will be emptied.
 
@@ -134,4 +143,31 @@ trait Secs:
 
 `renderEntity()` is called once for each entities in the system on every frame.  The `entity` parameter is the entity that's rendering and the `components` parameter has methods to query components of that entity.
 
+```scala
+object Secs:
+  def start(secs: Secs)(using world: World): Double => Unit = ???
+```
+
+To start the whole thing, call `Secs.start()`. it takes a `Secs` you implemented and returns a function you can call with the elasped time in milliseconds many times per second to get the animation going.
+
+## World
+You might see `World` required as a context parameter in some of the APIs.  We won't be going into much details here.  It is an implementation detail and should not be a concern for you as an API user.
+
 ## Example: Asteroids
+I made an simple and imcomplete Asteroids game to demostrate features of SECS.  It currently runs in the browser using HTML's canvas API for screen rendering.  Yes, the core SECS is cross-built for both Scala and Scala.js, it it will work as a library for both JVM and Javascript.  I've abstrated the rendering and input parts of the program so it will be easy to port it to JavaFX if I have the time.
+
+To run, `examples/fastLinkJS` in sbt to generate the necessary artifacts, then point your browser to `web/index.html`.  Left/right keys to turn, up key to accelerate, and space key to fire.
+
+Some technical details worth mentioning:
+
+### UI abstration
+Both the rendering and keyboard input APIs are abstracted to facilitate easier multiplatform implementation later on.
+
+### Events
+Both `TorpedoPoation` and `SpaceshipPosition` events are sent by the `EventSender` in torpedo and spaceship entities respectively.  These events are sent so that `EventReceiver` later on can process the events and detect if there were any collisions.
+
+```scala
+case class TorpedoPosition(entity: Entity, pos: (Double, Double)) derives EventSenderCM, EventReceiverCM
+case class SpaceshipPosition(entity: Entity, pos: (Double, Double)) derives EventSenderCM, EventReceiverCM
+```
+
