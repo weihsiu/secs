@@ -33,7 +33,7 @@ case class EntityC(entity: Entity) extends Component derives ComponentMeta
 ```
 
 ### Label
-`Label` component is used to precisicely query a set of entities.  It has a String type parameter which is used to identify it at the type level so we can use it in our query calculations.  The `id` parameter can be used to differentiate between different entity instances of the same label.
+`Label` component is used to precisicely query a set of similar entities.  It has a String type parameter which is used to identify similarity at the type level so we can use it in our query calculations.  The `id` parameter can be used to differentiate between different entity instances of the same label.  For instance, `Label["asteroid"]` can be used to identify entities that are asteroids in a query.  The `id` parameter can used to further specify the identiy of a particular entity.
 
 ```scala
 case class Label[L <: String](id: Int) extends Component
