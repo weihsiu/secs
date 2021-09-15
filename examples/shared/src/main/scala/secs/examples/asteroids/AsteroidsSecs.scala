@@ -1,11 +1,7 @@
 package secs.examples.asteroids
 
-import org.scalajs.dom
 import secs.{*, given}
 import secs.examples.ui.*
-
-import scala.scalajs.js
-import org.scalajs.dom.ext.KeyCode
 
 class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
   val spaceshipSegments = List(
@@ -59,6 +55,15 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
       (-6.0, -1.0, -2.0, 2.0),
       (-2.0, 2.0, -5.0, 6.0),
       (-5.0, 6.0, 0.0, 8.0)
+    ),
+    List(
+      (-4.0, 8.0, 4.0, 8.0),
+      (4.0, 8.0, 8.0, 1.0),
+      (8.0, 1.0, 8.0, -5.0),
+      (8.0, -5.0, -3.0, -8.0),
+      (-3.0, -8.0, -3.0, -3.0),
+      (-3.0, -3.0, -8.0, -3.0),
+      (-8.0, -3.0, -4.0, 8.0)
     )
   )
 
@@ -102,7 +107,7 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
   val height = renderer.height
 
   def spawnAsteroids(command: Command, scale: Double, pos: Option[(Double, Double)]): Unit =
-    for i <- 0 to 3 do
+    for i <- 0 to 4 do
       val p = pos.getOrElse((math.random * width, math.random * height))
       command
         .spawnEntity()
@@ -113,7 +118,7 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
         .insertComponent(EventReceiver[SpaceshipPosition]())
 
   def spawnDebris(command: Command, time: Double, pos: (Double, Double)): Unit =
-    for i <- 0 to 4 do
+    for i <- 0 to 5 do
       command
         .spawnEntity()
         .insertComponent(Label["debris"](0))
@@ -269,7 +274,14 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
       .getComponents[(Label["asteroid"], Movement, Scale)]
       .foreach((l, m, s) =>
         renderer
-          .strokePolygon(s.scale, 0, "white", m.pos._1, m.pos._2, asteroidSegments(l.id))
+          .strokePolygon(
+            s.scale,
+            360 / asteroidSegments.length * l.id,
+            "white",
+            m.pos._1,
+            m.pos._2,
+            asteroidSegments(l.id)
+          )
       )
     components
       .getComponents[(Label["debris"], Movement)]

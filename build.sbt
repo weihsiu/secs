@@ -14,7 +14,7 @@ val commonSettings = Seq(
 
 lazy val root = project
   .in(file("."))
-  .aggregate(coreJS, coreJVM, examples)
+  .aggregate(coreJS, coreJVM, examplesJS, examplesJVM)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
@@ -26,11 +26,18 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
 lazy val coreJS = core.js
 lazy val coreJVM = core.jvm
 
-lazy val examples = project
+lazy val osName = System.getProperty("os.name") match {
+  case n if n.startsWith("Linux")   => "linux"
+  case n if n.startsWith("Mac")     => "mac"
+  case n if n.startsWith("Windows") => "win"
+  case _                            => throw new Exception("Unknown platform!")
+}
+
+lazy val examples = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
   .in(file("examples"))
-  .enablePlugins(ScalaJSPlugin)
   .settings(commonSettings)
-  .settings(
+  .jsSettings(
     scalaJSUseMainModuleInitializer := true,
     // Compile / scalaJSMainModuleInitializer := Some(
     //   ModuleInitializer
@@ -41,4 +48,19 @@ lazy val examples = project
       ("org.scala-js" %%% "scalajs-dom" % "1.2.0").cross(CrossVersion.for3Use2_13)
     )
   )
-  .dependsOn(coreJS)
+  .jvmSettings(
+    Compile / run / fork := true,
+    scalacOptions ++= Seq(
+      "-language:adhocExtensions"
+    ),
+    libraryDependencies ++= Seq(
+      "org.scalafx" %% "scalafx" % "16.0.0-R24"
+    ) ++
+      Seq("base", "controls", "fxml", "graphics", "media", "swing", "web").map(m =>
+        "org.openjfx" % s"javafx-$m" % "16" classifier osName
+      )
+  )
+  .dependsOn(core)
+
+lazy val examplesJS = examples.js
+lazy val examplesJVM = examples.jvm

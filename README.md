@@ -33,7 +33,7 @@ case class EntityC(entity: Entity) extends Component derives ComponentMeta
 ```
 
 ### Label
-`Label` component is used to precisicely query a set of similar entities.  It has a String type parameter which is used to identify similarity at the type level so we can use it in our query calculations.  The `id` parameter can be used to differentiate between different entity instances of the same label.  For instance, `Label["asteroid"]` can be used to identify entities that are asteroids in a query.  The `id` parameter can used to further specify the identiy of a particular entity.
+`Label` component is used to precisicely query a set of similar entities.  It has a String type parameter which is used to identify similarity at the type level so we can use it in our query calculations.  The `id` parameter can be used to differentiate between different entity instances of the same label.  For instance, `Label["asteroid"]` can be used to identify entities that are asteroids in a query.  The `id` parameter can used to further specify the identity of a particular entity.
 
 ```scala
 case class Label[L <: String](id: Int) extends Component
@@ -157,6 +157,8 @@ You might see `World` required as a context parameter in some of the APIs.  We w
 I made an simple and imcomplete Asteroids game to demostrate features of SECS.  It currently runs in the browser using HTML's canvas API for screen rendering.  Yes, the core SECS is cross-built for both Scala and Scala.js, it it will work as a library for both JVM and Javascript.  I've abstrated the rendering and input parts of the program so it will be easy to port it to JavaFX if I have the time.
 
 To run, `examples/fastLinkJS` in sbt to generate the necessary artifacts, then point your browser to `web/index.html`.  Left/right keys to turn, up key to accelerate, and space key to fire.
+
+![Asteroids image](asteroids.png)
 
 Some technical details worth mentioning:
 
