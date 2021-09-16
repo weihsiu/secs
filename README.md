@@ -4,7 +4,7 @@
 While learning Rust and looking for a fun library to get my hands dirty, [Bevy](https://github.com/bevyengine/bevy) caught my eyes and using ECS (Entity Component System) to manage the artifacts in the game world and interactions within it was pretty refreshing.  So I thought wouldn't it be nice to be able to do the same thing in Scala, especially with the new meta-programming facilities made available in Scala 3, maybe I can implement some of the same features without resorting to macros.  Hence this experiment.
 
 ## TLDR: What I have accomplished
-I tried to model the API after Bevy, though some of the type signatures have changed because we are not restricted (shackled?) by the Rust lifetime checker.  But all in all, I believe I have accomplished what I had set out to do and designed an API that's pretty pleasant to use.  If you want to learn more, read on.
+I tried to model the API after Bevy, though some of the type signatures have changed because we are not restricted (shackled?) by the Rust lifetime checker.  But all in all, I believe I have accomplished what I had set out to do and designed an API that is pretty pleasant to use.  If you want to learn more, read on.
 
 ## Entity
 I used Opaque Type Alias to model entity which is simply an Int identifier.  Nothing fancy.  Since the identifier is never manipulated directly, there is no need to get the value out.
@@ -17,13 +17,13 @@ object Entity:
 ```
 
 ## Component
-Components in SECS are simply normal case classes that extend `Component` (marker trait) and derives `ComponentMeta`.  You can put whatever you want in a component and should be immutable.  `ComponentMeta` is a simple way to generate a singleton given for each component type and it uses the derives mechanism in Scala 3 to accomplish the task with minimum boilerplate.
+Components in SECS are just normal case classes that extend `Component` (marker trait) and derives `ComponentMeta`.  You can put whatever you want in a component and should be immutable.  `ComponentMeta` is a simple way to generate a singleton given for each component type and it uses the derives mechanism in Scala 3 to accomplish the task with minimum boilerplate.
 
 ```scala
 case class Dimension(width: Double, height: Double) extends Component derives ComponentMeta
 ```
 
-There are a couple of builtin components which is described below:
+There are a couple of builtin components which are described below:
 
 ### EntityC
 `EntityC` is a component that wraps the entity of selected components in the tuple.  It is useful when you want to get to the entity of the selected components, so you can insert/update/remove components on it.  `EntityC` is added automatically to each newly spawned entity, so you don't need to add it yourselves.
@@ -40,7 +40,7 @@ case class Label[L <: String](id: Int) extends Component
 ```
 
 ## System
-Systems in SECS are just normal Scala functions.  They are required to be inlined since we are doing some type level trickery to get the necessary information at compile time.  They use Using Clause to summon both `Command` and `Query` (more on them later) to provide the abilities to view and manipulate components.  I didn't follow the design decision in Bevy to structure systems more rigidly (having API to register them, for instance), instead you are just writing normal functions and use normal scala syntax to compose them.  I think this is more intuitive and flexible.
+Systems in SECS are just normal Scala functions.  They are required to be inlined since we are doing some type level trickery to get the necessary information at compile time.  They use Using Clause to summon both `Command` and `Query` (more on them later) to provide the abilities to view and manipulate components.  I didn't follow the design decision in Bevy to structure systems more rigidly (having API to register them, for instance); instead you are just writing normal functions and use normal scala syntax to compose them.  I think this is more intuitive and flexible.
 
 ```scala
 inline def updateDimensions(using
@@ -50,7 +50,7 @@ inline def updateDimensions(using
 ```
 
 ## Command
-`Command`/`EntityCommand` consists of a simple set of APIs to spawn/despawn (Bevy speak) entities, and manipulate components.  `Command` is used to spawn and despawn entities and `EntityCommand` is used to manipulate components belonging to a particular entity.
+`Command`/`EntityCommand` consists of a simple set of APIs to spawn/despawn (Bevy speak) entities, and manipulate components.  `Command` is used to spawn and despawn entities, and `EntityCommand` is used to manipulate components belonging to a particular entity.
 
 ```scala
 trait Command:
@@ -67,7 +67,7 @@ trait EntityCommand:
 ```
 
 ## Query
-Both `Command` and `Query` are passed to system functions when the program runs.  You can write whatever query your system function requires and SECS will try to satisfy it for you.  If the query is invalid (component doesn't exist, for instance), then the compilation will fail and you need to deal with it.  Once the program compiles, it also signifies that the query is valid.  This is what we all strive for to be able to detect our program error at the earliest time possible and compilation time is not bad at all.  The meta-programming features in Scala 3 let us do it quite easily.
+Both `Command` and `Query` are passed to system functions when the program runs.  You can write whatever query your system function requires and SECS will try to satisfy it for you.  If the query is invalid (component doesn't exist, for instance), then the compilation will fail and you need to deal with it.  Once the program compiles, it also signifies that the query is valid.  This is what we all strive for: to be able to detect our program error at the earliest time possible and compilation time is not bad at all.  The meta-programming features in Scala 3 let us do it quite easily.
 
 Here is the definition for Query, quite simple:
 
@@ -92,7 +92,7 @@ inline def updateSpaceship(time: Double)(using
     )
 ```
 
-So in the above example, the query is meant to gather a list of tuples each consists of components `EntityC`, `Direction`, `Movement`, and optionally `CoolOff` that belong to a single entity.  So if an entity has all the components listed but Direction, then its components will not be gathered.  If an entity has all the components but `CoolOff`, then its components will be gathered with the 4th element (`Option[CoolOff]`) in the tuple being None.  You can look at the query as selecting entities containing all the components queried because that's the expected result.  If some of the components might be missing, wrap them in Options.
+So in the above example, the query is meant to gather a list of tuples, each consists of components: `EntityC`, `Direction`, `Movement`, and optionally `CoolOff` that belong to a single entity.  So if an entity has all the components listed but Direction, then its components will not be gathered.  If an entity has all the components but `CoolOff`, then its components will be gathered with the 4th element (`Option[CoolOff]`) in the tuple being None.  You can look at the query as selecting entities containing all the components queried because that's the expected result.  If some of the components might be missing, wrap them in Options.
 
 The resulting tuple has the precise types of the query components, optional or not.  As the above code listing shows, the type of the resulting tuple is `(EntityC, Direction, Movement, Option[CoolOff])`, just like the query.  Using the command, you can then examine components, spawn new entities, add new components to them, update existing components (immutably, of course), even remove components if you like.
 
@@ -139,7 +139,7 @@ trait Secs:
 
 `tick()` is called every animation frame (in the case of browser, 60 times per second).  You usually call system functions that need to be executed on every animation tick there.  The `time` parameter is the elapsed time in milliseconds.
 
-`beforeRender()` and `afterRender()` are also called on every animation frame.  Both are called after `tick()` and sandwich calls to `renderEntity()` in between.  Things that require by rendering on every frame, like erasing the background, are done in `beforeRender()`.
+`beforeRender()` and `afterRender()` are also called on every animation frame.  Both are called after `tick()` and sandwich calls to `renderEntity()` in between.  Things that require rendering on every frame, like erasing the background, are done in `beforeRender()`.
 
 `renderEntity()` is called once for each entity in the system on every frame.  The `entity` parameter is the entity that's rendering and the `components` parameter has methods to query components of that entity.
 
@@ -148,7 +148,7 @@ object Secs:
   def start(secs: Secs)(using world: World): Double => Unit = ???
 ```
 
-To start the whole thing, call `Secs.start()`. it takes a `Secs` you implemented and returns a function you can call with the elapsed time in milliseconds many times per second to get the animation going.
+To start the whole thing, call `Secs.start()`.  It takes a `Secs` you implemented and returns a function you can call with the elapsed time in milliseconds many times per second to get the animation going.
 
 ## World
 You might see `World` required as a context parameter in some of the APIs.  We won't be going into many details here.  It is an implementation detail and should not be a concern for you as an API user.
@@ -170,7 +170,7 @@ Some technical details worth mentioning:
 Both the rendering and keyboard input APIs are abstracted to facilitate easier multiplatform implementation later on.  Pay particular attention to `animateFrame()` in `Secs`, the animation frames are expected to start after this method is called (if you are using some other rendering pipeline).
 
 ### Events
-Both `TorpedoPoation` and `SpaceshipPosition` events are sent by the `EventSender` in torpedo and spaceship entities respectively.  These events are sent so that `EventReceiver` in asteroids later on can process the events and detect if there were any collisions.  The order of calling system functions in `tick()` do matter so make sure you get them ordered correctly.
+Both `TorpedoPoation` and `SpaceshipPosition` events are sent by the `EventSender` in torpedo and spaceship entities, respectively.  These events are sent so that `EventReceiver` in asteroids later on can process the events and detect if there were any collisions.  The order of calling system functions in `tick()` do matter,  so make sure you get them ordered correctly.
 
 ```scala
 case class TorpedoPosition(entity: Entity, pos: (Double, Double)) derives EventSenderCM, EventReceiverCM
