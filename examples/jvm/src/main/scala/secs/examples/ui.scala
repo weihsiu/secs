@@ -17,8 +17,8 @@ enum KeyCode(val value: FxKeyCode):
 
 def scalafxKeyboard(scene: Scene): Keyboard = new Keyboard:
   private var downKeys = Set.empty[FxKeyCode]
-  scene.setOnKeyPressed(e => downKeys += e.getCode)
-  scene.setOnKeyReleased(e => downKeys -= e.getCode)
+  scene.onKeyPressed = e => downKeys += e.getCode
+  scene.onKeyReleased = e => downKeys -= e.getCode
 
   def keyDown(keyCode: KeyCode): Boolean = downKeys(keyCode.value)
 
