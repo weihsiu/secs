@@ -14,6 +14,10 @@ enum BoolOps:
   )
 export BoolOps.*
 
+enum Decorator:
+  case Added[A](cm: ComponentMeta[?])
+  case Changed[A](cm: ComponentMeta[?])
+
 trait Filter[OS <: BoolOps]:
   inline def boolOps: OS
 
