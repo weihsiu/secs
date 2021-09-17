@@ -10,6 +10,11 @@ import secs.{*, given}
 import secs.examples.ui.*
 
 object Asteroids extends JFXApp3:
+  System.setProperty(
+    "quantum.multithreaded",
+    "false"
+  ) // to slow down the psychotic frame rate in ubuntu
+
   def setup(width: Int, height: Int): (Scene, GraphicsContext) =
     val canvas = new Canvas(width, height)
     val scene1 = new Scene(width, height):
