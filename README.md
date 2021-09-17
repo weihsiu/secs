@@ -1,4 +1,4 @@
-# SECS: Scala Entity Component System
+# SECS - Scala Entity Component System
 
 ## Prelude
 While learning Rust and looking for a fun library to get my hands dirty, [Bevy](https://github.com/bevyengine/bevy) caught my eyes and using ECS (Entity Component System) to manage the artifacts in the game world and interactions within it was pretty refreshing.  So I thought wouldn't it be nice to be able to do the same thing in Scala, especially with the new meta-programming facilities made available in Scala 3, maybe I can implement some of the same features without resorting to macros.  Hence this experiment.
