@@ -1,5 +1,6 @@
 package secs
 
+import secs.Decorator.*
 import secs.BoolOps.*
 
 import scala.Tuple.{Filter as TFilter, *}
