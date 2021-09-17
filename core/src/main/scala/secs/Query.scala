@@ -69,20 +69,58 @@ object Query:
 
     private def validEntity(boolOps: BoolOps)(entity: Entity): Boolean =
       val cs = W.componentsWithin(entity)
+      lazy val prevCs = W.previousComponentsWithin(entity)
       def hasComponent(cm: ComponentMeta[?]): Boolean =
         cs.contains(cm.asInstanceOf[ComponentMeta[Nothing]])
+      def isAddedComponent(cm: ComponentMeta[?]): Boolean =
+        !prevCs.contains(cm.asInstanceOf[ComponentMeta[Nothing]]) && hasComponent(cm)
+      def isChangedComponent(cm: ComponentMeta[?]): Boolean =
+        prevCs
+          .get(cm.asInstanceOf[ComponentMeta[Nothing]])
+          .fold(false)(prevC =>
+            cs.get(cm.asInstanceOf[ComponentMeta[Nothing]]).fold(false)(_ != prevC)
+          )
       boolOps match
-        case ¬(cm: ComponentMeta[?]) => !hasComponent(cm)
-        case ¬(os: BoolOps)          => !validEntity(os)(entity)
+        case ¬(d: Added[?])                  => !isAddedComponent(d.cm)
+        case ¬(d: Changed[?])                => !isChangedComponent(d.cm)
+        case ¬(cm: ComponentMeta[?])         => !hasComponent(cm)
+        case ¬(os: BoolOps)                  => !validEntity(os)(entity)
+        case ∧(d1: Added[?], d2: Added[?])   => isAddedComponent(d1.cm) && isAddedComponent(d2.cm)
+        case ∧(d1: Added[?], d2: Changed[?]) => isAddedComponent(d1.cm) && isChangedComponent(d2.cm)
+        case ∧(d1: Changed[?], d2: Added[?]) => isChangedComponent(d1.cm) && isAddedComponent(d2.cm)
+        case ∧(d1: Changed[?], d2: Changed[?]) =>
+          isChangedComponent(d1.cm) && isChangedComponent(d2.cm)
+        case ∧(cm: ComponentMeta[?], d: Added[?])   => hasComponent(cm) && isAddedComponent(d.cm)
+        case ∧(d: Added[?], cm: ComponentMeta[?])   => isAddedComponent(d.cm) && hasComponent(cm)
+        case ∧(cm: ComponentMeta[?], d: Changed[?]) => hasComponent(cm) && isChangedComponent(d.cm)
+        case ∧(d: Changed[?], cm: ComponentMeta[?]) => isChangedComponent(d.cm) && hasComponent(cm)
+
+        case ∧(d: Added[?], os: BoolOps)   => isAddedComponent(d.cm) && validEntity(os)(entity)
+        case ∧(os: BoolOps, d: Added[?])   => validEntity(os)(entity) && isAddedComponent(d.cm)
+        case ∧(d: Changed[?], os: BoolOps) => isChangedComponent(d.cm) && validEntity(os)(entity)
+        case ∧(os: BoolOps, d: Changed[?]) => validEntity(os)(entity) && isChangedComponent(d.cm)
         case ∧(cm1: ComponentMeta[?], cm2: ComponentMeta[?]) =>
           hasComponent(cm1) && hasComponent(cm2)
         case ∧(cm: ComponentMeta[?], os: BoolOps) => hasComponent(cm) && validEntity(os)(entity)
-        case ∧(os: BoolOps, cm: ComponentMeta[?]) => hasComponent(cm) && validEntity(os)(entity)
-        case ∧(os1: BoolOps, os2: BoolOps) => validEntity(os1)(entity) && validEntity(os2)(entity)
+        case ∧(os: BoolOps, cm: ComponentMeta[?]) => validEntity(os)(entity) && hasComponent(cm)
+        case ∧(os1: BoolOps, os2: BoolOps)   => validEntity(os1)(entity) && validEntity(os2)(entity)
+        case ∨(d1: Added[?], d2: Added[?])   => isAddedComponent(d1.cm) || isAddedComponent(d2.cm)
+        case ∨(d1: Added[?], d2: Changed[?]) => isAddedComponent(d1.cm) || isChangedComponent(d2.cm)
+        case ∨(d1: Changed[?], d2: Added[?]) => isChangedComponent(d1.cm) || isAddedComponent(d2.cm)
+        case ∨(d1: Changed[?], d2: Changed[?]) =>
+          isChangedComponent(d1.cm) || isChangedComponent(d2.cm)
+        case ∨(cm: ComponentMeta[?], d: Added[?])   => hasComponent(cm) || isAddedComponent(d.cm)
+        case ∨(d: Added[?], cm: ComponentMeta[?])   => isAddedComponent(d.cm) || hasComponent(cm)
+        case ∨(cm: ComponentMeta[?], d: Changed[?]) => hasComponent(cm) || isChangedComponent(d.cm)
+        case ∨(d: Changed[?], cm: ComponentMeta[?]) => isChangedComponent(d.cm) || hasComponent(cm)
+        case ∨(d: Added[?], os: BoolOps)   => isAddedComponent(d.cm) || validEntity(os)(entity)
+        case ∨(os: BoolOps, d: Added[?])   => validEntity(os)(entity) || isAddedComponent(d.cm)
+        case ∨(d: Changed[?], os: BoolOps) => isChangedComponent(d.cm) || validEntity(os)(entity)
+        case ∨(os: BoolOps, d: Changed[?]) => validEntity(os)(entity) || isChangedComponent(d.cm)
         case ∨(cm1: ComponentMeta[?], cm2: ComponentMeta[?]) =>
           hasComponent(cm1) || hasComponent(cm2)
         case ∨(cm: ComponentMeta[?], os: BoolOps) => hasComponent(cm) || validEntity(os)(entity)
-        case ∨(os: BoolOps, cm: ComponentMeta[?]) => hasComponent(cm) || validEntity(os)(entity)
+        case ∨(os: BoolOps, cm: ComponentMeta[?]) => validEntity(os)(entity) || hasComponent(cm)
         case ∨(os1: BoolOps, os2: BoolOps) => validEntity(os1)(entity) || validEntity(os2)(entity)
         case _                             => sys.error("invalid BoolOps")
 

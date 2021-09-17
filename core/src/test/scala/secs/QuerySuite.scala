@@ -81,3 +81,25 @@ class QuerySuite extends munit.FunSuite:
     world.despawnEntity(entity1)
     world.despawnEntity(entity2)
   }
+
+  test("query 4") {
+    import BoolOps.*
+    import Decorator.*
+    inline def system(using
+        query: Query[EntityC *: EmptyTuple, Dimension ∧ Added[Rotation]]
+    ): Unit =
+      assertEquals(query.result.length, 1)
+    val entity1 = world.spawnEntity()
+    val entity2 = world.spawnEntity()
+    val dimension = Dimension(10, 20)
+    val heading = Heading(123)
+    val rotation = Rotation(321)
+    world.insertComponent(entity1, dimension)
+    world.insertComponent(entity1, heading)
+    world.insertComponent(entity2, dimension)
+    world.insertComponent(entity2, heading)
+    world.insertComponent(entity2, rotation)
+    system
+    world.despawnEntity(entity1)
+    world.despawnEntity(entity2)
+  }

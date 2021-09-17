@@ -60,4 +60,10 @@ class FilterSuite extends munit.FunSuite:
         Changed(ComponentMeta[Dimension])
       )
     )
+    assert(
+      summon[Filter[∨[Heading, Changed[Dimension]]]].boolOps == ∨(
+        ComponentMeta[Heading],
+        Changed(ComponentMeta[Dimension])
+      )
+    )
   }

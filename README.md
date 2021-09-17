@@ -104,10 +104,18 @@ The actual `Query` takes not 1 but 2 type parameters: the first one is the expec
 For example, `[Heading ∧ Dimension] ∨ ¬[Rotation]` signifies a filter that only selects entities having both Heading and Dimension components or not having Rotation components.  The component types that appear in the filter are only for selecting criteria only, they will not be appearing in the query result list.
 
 ```scala
-inline def system(using query: Query[(EntityC, Dimension, Heading), ¬[Rotation]]): Unit = ???
+inline def system(using Q: Query[(EntityC, Dimension, Heading), ¬[Rotation]]): Unit = ???
 ```
 
 The above query will return a list of tuples of type `(EntityC, Dimension, Heading)` containing within entities that don't contain Rotation.
+
+Furthermore, you can also use Added[C <: Component] and Changed[C <: Component] in place of Component types in the filter to signify the entity selected needs to have a particular Component type added or changed.
+
+```scala
+inline def system(using Q: Query[EntityC *: EmptyTuple, Dimension ∧ Added[Rotation]]): Unit = ???
+```
+
+So in the above query, entities are selected if they have `Dimension`s and have `Rotation`s added to them.
 
 ## Event
 The way SECS manages events is a little different than what Bevy does.  There are builtin components `EventSender[E]` and `EventReceiver[E]` where `E` is an arbitrary event type (case class) that derives both `EventSenderCM` and `EventReceiverCM`.  Entities can add `EventSender[E]` to send events of type `E` and `EventReceiver[E]` to receive events of type `E`.  Multiple entities can add the same `EventSender[E]` and send events to the event queue where they will be aggregated.  Every `EventReceiver[E]`, on the other hand, can receive the same events of type `E` from the same queue and process them.  The queue will only persist for one tick (animation frame).  So after each tick, all the event queues will be emptied.
@@ -144,11 +152,22 @@ trait Secs:
 `renderEntity()` is called once for each entity in the system on every frame.  The `entity` parameter is the entity that's rendering and the `components` parameter has methods to query components of that entity.
 
 ```scala
+trait Components:
+  def getComponent[C <: Component: ComponentMeta]: Option[C]
+
+extension (components: Components)
+    inline def getComponents[CS <: Tuple]: Option[CS] = ???
+```
+
+`getComponent[C <: Component: ComponentMeta]` returns a component of type C if it exists.
+`getComponents[CS <: Tuple]` return a tuple of components if they all exist.
+
+To start the whole thing, call `Secs.start()`.  It takes a `Secs` you implemented and returns a function you can call with the elapsed time in milliseconds many times per second to get the animation going.
+
+```scala
 object Secs:
   def start(secs: Secs)(using world: World): Double => Unit = ???
 ```
-
-To start the whole thing, call `Secs.start()`.  It takes a `Secs` you implemented and returns a function you can call with the elapsed time in milliseconds many times per second to get the animation going.
 
 ## World
 You might see `World` required as a context parameter in some of the APIs.  We won't be going into many details here.  It is an implementation detail and should not be a concern for you as an API user.
@@ -180,4 +199,3 @@ case class SpaceshipPosition(entity: Entity, pos: (Double, Double)) derives Even
 ## TODO
 * Hierarchical entities
 * Parallel systems
-* Added/Changed filters

@@ -8,6 +8,7 @@ trait World:
   def allEntities(): Set[Entity]
   def entitiesWith[C <: Component](using CM: ComponentMeta[C]): Set[Entity]
   def componentsWithin[C <: Component](entity: Entity): Map[ComponentMeta[C], C]
+  def previousComponentsWithin[C <: Component](entity: Entity): Map[ComponentMeta[C], C]
   def spawnEntity(): Entity
   def despawnEntity(entity: Entity): Unit
   def insertComponent[C <: Component](entity: Entity, component: C)(using
