@@ -1,6 +1,7 @@
 package secs
 
-import scala.collection.immutable.{Iterable, Queue}
+import scala.collection.immutable.Iterable
+import scala.collection.immutable.Queue
 
 trait World:
   def tick(time: Double): Unit
@@ -23,12 +24,15 @@ trait World:
 
 given World with
   private var components = Map.empty[ComponentMeta[Component], Set[Entity]]
-  private var entities =
-    Map.empty[Entity, Map[ComponentMeta[Component], Component]]
+  private var previousComponents = Map.empty[ComponentMeta[Component], Set[Entity]]
+  private var entities = Map.empty[Entity, Map[ComponentMeta[Component], Component]]
+  private var previousEntities = Map.empty[Entity, Map[ComponentMeta[Component], Component]]
   private var currentEntityId = 0
   private var events = Map.empty[ComponentMeta[EventSender[?]], Queue[?]]
 
   def tick(time: Double) =
+    previousComponents = components
+    previousEntities = entities
     events = Map.empty
 
   def allEntities() = entities.keySet
@@ -38,6 +42,12 @@ given World with
 
   def componentsWithin[C <: Component](entity: Entity) =
     entities
+      .get(entity)
+      .getOrElse(Map.empty)
+      .asInstanceOf[Map[ComponentMeta[C], C]]
+
+  def previousComponentsWithin[C <: Component](entity: Entity) =
+    previousEntities
       .get(entity)
       .getOrElse(Map.empty)
       .asInstanceOf[Map[ComponentMeta[C], C]]
