@@ -1,7 +1,7 @@
 package secs
 
-import secs.Decorator.*
 import secs.BoolOps.*
+import secs.Decorator.*
 
 import scala.Tuple.{Filter as TFilter, *}
 import scala.compiletime.*

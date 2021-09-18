@@ -1,6 +1,8 @@
 package secs
 
 import scala.compiletime.*
+import secs.BoolOps.*
+import secs.Decorator.*
 
 class FilterSuite extends munit.FunSuite:
 
@@ -11,8 +13,6 @@ class FilterSuite extends munit.FunSuite:
   case class Rotation(angle: Double) extends Component derives ComponentMeta
 
   test("filter 1") {
-    import BoolOps.*
-    import Decorator.*
     assert(
       summon[Filter[¬[Heading ∧ Dimension ∨ ¬[Rotation]]]].boolOps == ¬(
         ∨(
