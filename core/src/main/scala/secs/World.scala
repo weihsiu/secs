@@ -6,6 +6,7 @@ import scala.collection.immutable.Queue
 trait World:
   def tick(time: Double): Unit
   def allEntities(): Set[Entity]
+  def allPreviousEntities(): Set[Entity]
   def entitiesWith[C <: Component](using CM: ComponentMeta[C]): Set[Entity]
   def componentsWithin[C <: Component](entity: Entity): Map[ComponentMeta[C], C]
   def previousComponentsWithin[C <: Component](entity: Entity): Map[ComponentMeta[C], C]
@@ -37,6 +38,8 @@ given World with
     events = Map.empty
 
   def allEntities() = entities.keySet
+
+  def allPreviousEntities() = previousEntities.keySet
 
   def entitiesWith[C <: Component](using CM: ComponentMeta[C]) =
     components.get(CM).getOrElse(Set.empty)

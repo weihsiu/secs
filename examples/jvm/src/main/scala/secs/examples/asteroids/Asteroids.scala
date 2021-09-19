@@ -8,6 +8,9 @@ import scalafx.scene.canvas.Canvas
 import scalafx.scene.canvas.GraphicsContext
 import secs.{*, given}
 import secs.examples.ui.*
+import scala.concurrent.*
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 
 object Asteroids extends JFXApp3:
   System.setProperty(
@@ -29,5 +32,13 @@ object Asteroids extends JFXApp3:
     val keyboard = scalafxKeyboard(scene)
     val renderer = scalafxRenderer(context)
     val secs = AsteroidsSecs(keyboard, renderer)
-    val ticker = Secs.start(secs)
+    val ticker = Secs.start(
+      secs,
+      Some((tick, time) =>
+        val f = Future(tick(time))
+        () => Await.result(f, Duration.Inf)
+      // tick(time)
+      // () => ()
+      )
+    )
     renderer.animateFrame(ticker)

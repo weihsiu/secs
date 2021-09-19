@@ -9,6 +9,7 @@ trait Components:
 
 trait Secs:
   type Worldly = World ?=> Unit
+  type Tick = Double => Worldly
   def init(): Worldly
   def tick(time: Double): Worldly
   def beforeRender(): Unit
@@ -42,15 +43,22 @@ object Secs:
         )
         .asInstanceOf[Option[CS]]
 
-  def start(secs: Secs)(using world: World): Double => Unit =
+  def start(secs: Secs, ticker: Option[(Secs#Tick, Double) => () => Unit] = None)(using
+      world: World
+  ): Double => Unit =
     secs.init()
     time =>
-      world.tick(time)
-      secs.tick(time)
+      synchronized(world.tick(time))
+      val join = ticker match
+        case Some(t) => t(secs.tick, time)
+        case None =>
+          secs.tick(time)
+          () => ()
       secs.beforeRender()
       world
-        .allEntities()
-        .foreach(e => secs.renderEntity(e, DefaultComponents(world.componentsWithin(e))))
+        .allPreviousEntities()
+        .foreach(e => secs.renderEntity(e, DefaultComponents(world.previousComponentsWithin(e))))
       secs.afterRender()
+      join()
 
 export Secs.*
