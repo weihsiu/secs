@@ -1,7 +1,7 @@
 # SECS - Scala Entity Component System
 
 ## Prelude
-While learning Rust and looking for a fun library to get my hands dirty, [Bevy](https://github.com/bevyengine/bevy) caught my eyes and using ECS (Entity Component System) to manage the artifacts in the game world and interactions within it was pretty refreshing.  So I thought wouldn't it be nice to be able to do the same thing in Scala, especially with the new meta-programming facilities made available in Scala 3, maybe I can implement some of the same features without resorting to macros.  Hence this experiment.
+While learning Rust and looking for a fun library to get my hands dirty, [Bevy](https://github.com/bevyengine/bevy) caught my eyes and using [ECS (Entity Component System)](https://en.wikipedia.org/wiki/Entity_component_system) to manage the artifacts in the game world and interactions within it was pretty refreshing.  So I thought wouldn't it be nice to be able to do the same thing in Scala, especially with the new meta-programming facilities made available in Scala 3, maybe I can implement some of the same features without resorting to macros.  Hence this experiment.
 
 ## TLDR: What I have accomplished
 I tried to model the API after Bevy, though some of the type signatures have changed because we are not restricted (shackled?) by the Rust lifetime checker.  But all in all, I believe I have accomplished what I had set out to do and designed an API that is pretty pleasant to use.  If you want to learn more, read on.
@@ -162,11 +162,11 @@ extension (components: Components)
 `getComponent[C <: Component: ComponentMeta]` returns a component of type C if it exists.
 `getComponents[CS <: Tuple]` return a tuple of components if they all exist.
 
-To start the whole thing, call `Secs.start()`.  It takes a `Secs` you implemented and returns a function you can call with the elapsed time in milliseconds many times per second to get the animation going.
+To start the whole thing, call `Secs.start()`.  It takes a `Secs` you implemented and returns a function you can call with the elapsed time in milliseconds many times per second to get the animation going.  Optional it takes a `ticker` which is a function that takes a `Double` (elapsed time in milliseconds) and returns a join function.  This `ticker` parameter is an optimization SECS provides if the underlying runtime environment supports multithreading.  You are responsible for calling your implementation of `Secs.tick()` with the `time` parameter on another thread and returning a parameterless function which, when called, will wait until `Secs.tick()` finishes executing.  Check out the JVM version of `Asteroids.scala` in `examples/asteroids` to see how it's done.  With this optimization in place, we are basically doing the system function calculations and rendering at the same time.
 
 ```scala
 object Secs:
-  def start(secs: Secs)(using world: World): Double => Unit = ???
+  def start(secs: Secs, ticker: Option[Double => () => Unit] = None)(using world: World): Double => Unit = ???
 ```
 
 ## World

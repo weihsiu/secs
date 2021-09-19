@@ -34,11 +34,9 @@ object Asteroids extends JFXApp3:
     val secs = AsteroidsSecs(keyboard, renderer)
     val ticker = Secs.start(
       secs,
-      Some((tick, time) =>
-        val f = Future(tick(time))
+      Some(time =>
+        val f = Future(secs.tick(time))
         () => Await.result(f, Duration.Inf)
-      // tick(time)
-      // () => ()
       )
     )
     renderer.animateFrame(ticker)
