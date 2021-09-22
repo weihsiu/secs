@@ -1,4 +1,4 @@
-package secs.examples.ui
+package secs.examples.asteroids.ui
 
 trait Renderer:
   def width: Double

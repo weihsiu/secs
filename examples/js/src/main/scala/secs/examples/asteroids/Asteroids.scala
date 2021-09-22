@@ -5,7 +5,7 @@ import org.scalajs.dom.html
 import org.scalajs.dom.raw.CanvasRenderingContext2D
 import scala.scalajs.js
 import secs.{*, given}
-import secs.examples.ui.*
+import secs.examples.asteroids.ui.*
 
 object Asteroids:
   def setup(width: Int, height: Int): CanvasRenderingContext2D =

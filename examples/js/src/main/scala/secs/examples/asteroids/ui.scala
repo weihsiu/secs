@@ -1,4 +1,4 @@
-package secs.examples.ui
+package secs.examples.asteroids.ui
 
 import org.scalajs.dom
 import org.scalajs.dom.ext.{KeyCode as HKeyCode}

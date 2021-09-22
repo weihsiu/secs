@@ -1,7 +1,7 @@
 package secs.examples.asteroids
 
 import secs.{*, given}
-import secs.examples.ui.*
+import secs.examples.asteroids.ui.*
 
 class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
   val spaceshipSegments = List(

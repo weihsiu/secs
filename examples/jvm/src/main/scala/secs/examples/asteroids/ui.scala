@@ -1,4 +1,4 @@
-package secs.examples.ui
+package secs.examples.asteroids.ui
 
 import scalafx.Includes.*
 import scalafx.animation.AnimationTimer
@@ -6,7 +6,6 @@ import scalafx.scene.Scene
 import scalafx.scene.canvas.GraphicsContext
 import scalafx.scene.input.{KeyCode as FxKeyCode}
 import scalafx.scene.paint.Paint
-import secs.examples.ui.Renderer
 
 enum KeyCode(val value: FxKeyCode):
   case Space extends KeyCode(FxKeyCode.Space)
