@@ -4,6 +4,19 @@ import scala.Tuple.*
 import scala.collection.immutable
 import scala.compiletime.*
 
+enum EntityStatus:
+  case Spawned, Alive, Despawned
+
+case class EntityStatuses(statuses: Set[EntityStatus])
+
+object EntityStatuses:
+  implicit val fromStatus: Conversion[EntityStatus, EntityStatuses] = s =>
+    EntityStatuses(
+      Set(s)
+    )
+  extension (statuses: EntityStatuses)
+    def +(status: EntityStatus): EntityStatuses = EntityStatuses(statuses.statuses + status)
+
 trait Components:
   def getComponent[C <: Component: ComponentMeta]: Option[C]
 
