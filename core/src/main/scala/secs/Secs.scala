@@ -11,7 +11,7 @@ export EntityStatus.*
 trait Components:
   def getComponent[C <: Component: ComponentMeta]: Option[C]
 
-trait Secs[A <: Tuple]:
+trait Secs[SS <: Tuple]:
   type Worldly = World ?=> Unit
   def init(): Worldly
   def tick(time: Double): Worldly
@@ -20,7 +20,7 @@ trait Secs[A <: Tuple]:
       entity: Entity,
       status: EntityStatus,
       components: Components,
-      previousComponents: Option[Components]
+      previousComponents: => Components
   ): Unit
   def afterRender(): Unit
 
@@ -51,25 +51,48 @@ object Secs:
         )
         .asInstanceOf[Option[CS]]
 
-  inline def renderEntities[A <: Tuple](secs: Secs[A])(using W: World): Unit =
-    inline erasedValue[A] match
-      case _: (Spawned.type *: rest) => renderEntities[rest](secs.asInstanceOf[Secs[rest]])
-      case _: (Alive.type *: rest) =>
-        W
-          .allPreviousEntities()
-          .foreach(e =>
-            secs.renderEntity(
-              e,
-              Alive,
-              DefaultComponents(W.previousComponentsWithin(e)),
-              Some(DefaultComponents(W.previous2ComponentsWithin(e)))
-            )
-          )
-        renderEntities[rest](secs.asInstanceOf[Secs[rest]])
-      case _: (Despawned.type *: rest) => renderEntities[rest](secs.asInstanceOf[Secs[rest]])
-      case _: EmptyTuple               => ()
+  inline def renderEntitiesWithStatus[SS <: Tuple](
+      secs: Secs[SS],
+      status: EntityStatus,
+      entities: Set[Entity]
+  )(using
+      W: World
+  ): Unit =
+    entities.foreach(e =>
+      secs.renderEntity(
+        e,
+        status,
+        DefaultComponents(W.previousComponentsWithin(e)),
+        DefaultComponents(W.previous2ComponentsWithin(e))
+      )
+    )
 
-  inline def start[A <: Tuple](secs: Secs[A], ticker: Option[Double => () => Unit] = None)(using
+  inline def renderEntities[SS <: Tuple](secs: Secs[SS])(using W: World): Unit =
+    inline erasedValue[SS] match
+      case _: (Spawned.type *: rest) =>
+        renderEntitiesWithStatus[SS](
+          secs,
+          Spawned,
+          W.allPreviousEntities().diff(W.allPrevious2Entities())
+        )
+        renderEntities[rest](secs.asInstanceOf[Secs[rest]])
+      case _: (Alive.type *: rest) =>
+        renderEntitiesWithStatus[SS](
+          secs,
+          Alive,
+          W.allPreviousEntities().intersect(W.allPrevious2Entities())
+        )
+        renderEntities[rest](secs.asInstanceOf[Secs[rest]])
+      case _: (Despawned.type *: rest) =>
+        renderEntitiesWithStatus[SS](
+          secs,
+          Despawned,
+          W.allPrevious2Entities().diff(W.allPreviousEntities())
+        )
+        renderEntities[rest](secs.asInstanceOf[Secs[rest]])
+      case _: EmptyTuple => ()
+
+  inline def start[SS <: Tuple](secs: Secs[SS], ticker: Option[Double => () => Unit] = None)(using
       W: World
   ): Double => Unit =
     secs.init()
@@ -81,7 +104,7 @@ object Secs:
           secs.tick(time)
           () => ()
       secs.beforeRender()
-      renderEntities[A](secs)
+      renderEntities[SS](secs)
       secs.afterRender()
       join()
 

@@ -4,7 +4,7 @@ import secs.{*, given}
 import secs.examples.asteroids.ui.*
 
 class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer)
-    extends Secs[(Spawned.type, Alive.type, Despawned.type)]:
+    extends Secs[(Spawned.type, Alive.type)]:
   val spaceshipSegments = List(
     (10.0, 0.0, -10.0, 5.0),
     (10.0, 0.0, -10.0, -5.0),
@@ -270,8 +270,10 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer)
       entity: Entity,
       status: EntityStatus,
       components: Components,
-      previousComponent: Option[Components]
+      previousComponent: => Components
   ) =
+    if status == Spawned && components.getComponent[Label["torpedo"]].isDefined then println(entity)
+
     components
       .getComponents[(Label["spaceship"], Movement, Direction)]
       .foreach((l, m, d) =>
