@@ -4,10 +4,9 @@ import scala.Tuple.*
 import scala.collection.immutable
 import scala.compiletime.*
 
-sealed trait EntityStatus
-trait Spawned extends EntityStatus
-trait Alive extends EntityStatus
-trait Despawned extends EntityStatus
+enum EntityStatus:
+  case Spawned, Alive, Despawned
+export EntityStatus.*
 
 trait Components:
   def getComponent[C <: Component: ComponentMeta]: Option[C]
@@ -17,7 +16,12 @@ trait Secs[A <: Tuple]:
   def init(): Worldly
   def tick(time: Double): Worldly
   def beforeRender(): Unit
-  def renderEntity(entity: Entity, status: EntityStatus, components: Components, previousComponents: Option[Components]): Unit
+  def renderEntity(
+      entity: Entity,
+      status: EntityStatus,
+      components: Components,
+      previousComponents: Option[Components]
+  ): Unit
   def afterRender(): Unit
 
 object Secs:
@@ -47,26 +51,32 @@ object Secs:
         )
         .asInstanceOf[Option[CS]]
 
+  inline def renderEntities[A <: Tuple](secs: Secs[A])(using W: World): Unit =
+    inline erasedValue[A] match
+      case _: (Spawned.type *: rest) => renderEntities[rest](secs.asInstanceOf[Secs[rest]])
+      case _: (Alive.type *: rest) =>
+        W
+          .allPreviousEntities()
+          .foreach(e =>
+            secs.renderEntity(e, Alive, DefaultComponents(W.previousComponentsWithin(e)), None)
+          )
+        renderEntities[rest](secs.asInstanceOf[Secs[rest]])
+      case _: (Despawned.type *: rest) => renderEntities[rest](secs.asInstanceOf[Secs[rest]])
+      case _: EmptyTuple               => ()
+
   inline def start[A <: Tuple](secs: Secs[A], ticker: Option[Double => () => Unit] = None)(using
-      world: World
+      W: World
   ): Double => Unit =
-    inline def renderEntities[A <: Tuple]: Unit =
-      inline erasedValue[A] match
-        case _: Spawned *: rest
     secs.init()
     time =>
-      synchronized(world.tick(time))
+      synchronized(W.tick(time))
       val join = ticker match
         case Some(t) => t(time)
         case None =>
           secs.tick(time)
           () => ()
       secs.beforeRender()
-      inline erasedValue[A] match
-        case _
-      world
-        .allPreviousEntities()
-        .foreach(e => secs.renderEntity(e, DefaultComponents(world.previousComponentsWithin(e))))
+      renderEntities[A](secs)
       secs.afterRender()
       join()
 

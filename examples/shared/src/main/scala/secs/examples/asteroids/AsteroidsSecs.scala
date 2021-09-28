@@ -3,7 +3,8 @@ package secs.examples.asteroids
 import secs.{*, given}
 import secs.examples.asteroids.ui.*
 
-class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
+class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer)
+    extends Secs[(Spawned.type, Alive.type, Despawned.type)]:
   val spaceshipSegments = List(
     (10.0, 0.0, -10.0, 5.0),
     (10.0, 0.0, -10.0, -5.0),
@@ -265,7 +266,12 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer) extends Secs:
   def beforeRender() =
     renderer.fillRect("black", 0, 0, width, height)
 
-  def renderEntity(entity: Entity, components: Components) =
+  def renderEntity(
+      entity: Entity,
+      status: EntityStatus,
+      components: Components,
+      previousComponent: Option[Components]
+  ) =
     components
       .getComponents[(Label["spaceship"], Movement, Direction)]
       .foreach((l, m, d) =>
