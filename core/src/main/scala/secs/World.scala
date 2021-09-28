@@ -7,9 +7,11 @@ trait World:
   def tick(time: Double): Unit
   def allEntities(): Set[Entity]
   def allPreviousEntities(): Set[Entity]
+  def allPrevious2Entities(): Set[Entity]
   def entitiesWith[C <: Component](using CM: ComponentMeta[C]): Set[Entity]
   def componentsWithin[C <: Component](entity: Entity): Map[ComponentMeta[C], C]
   def previousComponentsWithin[C <: Component](entity: Entity): Map[ComponentMeta[C], C]
+  def previous2ComponentsWithin[C <: Component](entity: Entity): Map[ComponentMeta[C], C]
   def spawnEntity(): Entity
   def despawnEntity(entity: Entity): Unit
   def insertComponent[C <: Component](entity: Entity, component: C)(using
@@ -27,19 +29,25 @@ trait World:
 given World with
   private var components = Map.empty[ComponentMeta[Component], Set[Entity]]
   private var previousComponents = Map.empty[ComponentMeta[Component], Set[Entity]]
+  private var previous2Components = Map.empty[ComponentMeta[Component], Set[Entity]]
   private var entities = Map.empty[Entity, Map[ComponentMeta[Component], Component]]
   private var previousEntities = Map.empty[Entity, Map[ComponentMeta[Component], Component]]
+  private var previous2Entities = Map.empty[Entity, Map[ComponentMeta[Component], Component]]
   private var currentEntityId = 0
   private var events = Map.empty[ComponentMeta[EventSender[?]], Queue[?]]
 
   def tick(time: Double) =
+    previous2Components = previousComponents
     previousComponents = components
+    previous2Entities = previousEntities
     previousEntities = entities
     events = Map.empty
 
   def allEntities() = entities.keySet
 
   def allPreviousEntities() = previousEntities.keySet
+
+  def allPrevious2Entities() = previous2Entities.keySet
 
   def entitiesWith[C <: Component](using CM: ComponentMeta[C]) =
     components.get(CM).getOrElse(Set.empty)
@@ -52,6 +60,12 @@ given World with
 
   def previousComponentsWithin[C <: Component](entity: Entity) =
     previousEntities
+      .get(entity)
+      .getOrElse(Map.empty)
+      .asInstanceOf[Map[ComponentMeta[C], C]]
+
+  def previous2ComponentsWithin[C <: Component](entity: Entity) =
+    previous2Entities
       .get(entity)
       .getOrElse(Map.empty)
       .asInstanceOf[Map[ComponentMeta[C], C]]

@@ -4,28 +4,20 @@ import scala.Tuple.*
 import scala.collection.immutable
 import scala.compiletime.*
 
-enum EntityStatus:
-  case Spawned, Alive, Despawned
-
-case class EntityStatuses(statuses: Set[EntityStatus])
-
-object EntityStatuses:
-  implicit val fromStatus: Conversion[EntityStatus, EntityStatuses] = s =>
-    EntityStatuses(
-      Set(s)
-    )
-  extension (statuses: EntityStatuses)
-    def +(status: EntityStatus): EntityStatuses = EntityStatuses(statuses.statuses + status)
+sealed trait EntityStatus
+trait Spawned extends EntityStatus
+trait Alive extends EntityStatus
+trait Despawned extends EntityStatus
 
 trait Components:
   def getComponent[C <: Component: ComponentMeta]: Option[C]
 
-trait Secs:
+trait Secs[A <: Tuple]:
   type Worldly = World ?=> Unit
   def init(): Worldly
   def tick(time: Double): Worldly
   def beforeRender(): Unit
-  def renderEntity(entity: Entity, components: Components): Unit
+  def renderEntity(entity: Entity, status: EntityStatus, components: Components, previousComponents: Option[Components]): Unit
   def afterRender(): Unit
 
 object Secs:
@@ -55,9 +47,12 @@ object Secs:
         )
         .asInstanceOf[Option[CS]]
 
-  def start(secs: Secs, ticker: Option[Double => () => Unit] = None)(using
+  inline def start[A <: Tuple](secs: Secs[A], ticker: Option[Double => () => Unit] = None)(using
       world: World
   ): Double => Unit =
+    inline def renderEntities[A <: Tuple]: Unit =
+      inline erasedValue[A] match
+        case _: Spawned *: rest
     secs.init()
     time =>
       synchronized(world.tick(time))
@@ -67,6 +62,8 @@ object Secs:
           secs.tick(time)
           () => ()
       secs.beforeRender()
+      inline erasedValue[A] match
+        case _
       world
         .allPreviousEntities()
         .foreach(e => secs.renderEntity(e, DefaultComponents(world.previousComponentsWithin(e))))
