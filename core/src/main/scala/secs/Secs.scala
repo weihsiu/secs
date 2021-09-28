@@ -58,7 +58,12 @@ object Secs:
         W
           .allPreviousEntities()
           .foreach(e =>
-            secs.renderEntity(e, Alive, DefaultComponents(W.previousComponentsWithin(e)), None)
+            secs.renderEntity(
+              e,
+              Alive,
+              DefaultComponents(W.previousComponentsWithin(e)),
+              Some(DefaultComponents(W.previous2ComponentsWithin(e)))
+            )
           )
         renderEntities[rest](secs.asInstanceOf[Secs[rest]])
       case _: (Despawned.type *: rest) => renderEntities[rest](secs.asInstanceOf[Secs[rest]])
