@@ -17,13 +17,6 @@ object Query:
       case Option[?] => false
       case ?         => true
 
-    // private def toEntities(cms: Tuple): List[Set[Entity]] =
-    //   cms match
-    //     case (cm: ComponentMeta[? <: Component]) *: cms =>
-    //       W.entitiesWith(using cm) :: toEntities(cms)
-    //     case x *: _ => sys.error(s"invalid type: $x")
-    //     case _      => Nil
-
     inline def toEntities[CS <: Tuple]: List[Set[Entity]] =
       inline erasedValue[CS] match
         case _: (c *: cs) =>
@@ -31,30 +24,6 @@ object Query:
             summonInline[ComponentMeta[c]].asInstanceOf[ComponentMeta[Component]]
           ) :: toEntities[cs]
         case _ => Nil
-
-    // type ToComponent[CM] = CM match
-    //   case ComponentMeta[c] => c
-    // inline def toComponents(entity: Entity, cms: Tuple): Tuple =
-    //   cms.map[ToComponent](
-    //     [cm] =>
-    //       (x: cm) =>
-    //         W.componentsWithin(entity)(x.asInstanceOf[ComponentMeta[Component]])
-    //           .asInstanceOf[ToComponent[cm]]
-    //   )
-
-    // type ToComponentMeta[C] = C match
-    //   case Option[c] => ComponentMeta[c]
-    //   case ?         => ComponentMeta[C]
-    // inline def toComponents2[CS <: Tuple](entity: Entity, cms: Tuple): Tuple =
-    //   inline (cms, erasedValue[CS]) match
-    //     case (cm *: cms, _: (Option[?] *: cs)) =>
-    //       W.componentsWithin(entity)
-    //         .get(cm.asInstanceOf[ComponentMeta[Component]])
-    //         .asInstanceOf[Option[Component]] *: toComponents2[cs](entity, cms)
-    //     case (cm *: cms, _: (? *: cs)) =>
-    //       W.componentsWithin(entity)(cm.asInstanceOf[ComponentMeta[Component]])
-    //         .asInstanceOf[Component] *: toComponents2[cs](entity, cms)
-    //     case (EmptyTuple, _: EmptyTuple.type) => EmptyTuple
 
     inline def toComponents[CS <: Tuple](entity: Entity): Tuple =
       inline erasedValue[CS] match

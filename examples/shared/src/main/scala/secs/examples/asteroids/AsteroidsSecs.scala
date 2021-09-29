@@ -272,8 +272,6 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer)
       components: Components,
       previousComponent: => Components
   ) =
-    if status == Spawned && components.getComponent[Label["torpedo"]].isDefined then println(entity)
-
     components
       .getComponents[(Label["spaceship"], Movement, Direction)]
       .foreach((l, m, d) =>
