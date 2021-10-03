@@ -7,7 +7,6 @@ import scalafx.scene.Scene
 import scalafx.scene.canvas.Canvas
 import scalafx.scene.canvas.GraphicsContext
 import secs.{*, given}
-import secs.examples.asteroids.ui.*
 import scala.concurrent.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration

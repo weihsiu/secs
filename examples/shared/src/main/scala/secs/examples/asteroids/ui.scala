@@ -1,4 +1,7 @@
-package secs.examples.asteroids.ui
+package secs.examples.asteroids
+
+trait Keyboard:
+  def keyDown(keyCode: KeyCode): Boolean
 
 trait Renderer:
   def width: Double

@@ -1,4 +1,4 @@
-package secs.examples.asteroids.ui
+package secs.examples.asteroids
 
 import scalafx.Includes.*
 import scalafx.animation.AnimationTimer
