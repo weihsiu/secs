@@ -131,15 +131,23 @@ case class EventReceiver[E]() extends Component:
 Events are great for systems to exchange information that might be cumbersome to do via inserting, querying, and removing components.  Even though systems in SECS are composed of functions and functions compose, using events this way shows our intent clearly and aids in the querying of components as well.
 
 ## Secs
-To tie everything together, we have `Secs`.  It's a trait that every SECS program needs to implement to run.  Methods in Secs are lifecycle methods (borrowing a React term) and are called when the occasions arise.
+To tie everything together, we have `Secs`.  It's a trait that every SECS program needs to implement to run.  It has a generic parameter which specifies the entity statuses allowed (we will talk more about it later).  Methods in Secs are lifecycle methods (borrowing a React term) and are called when the occasions arise.
 
 ```scala
-trait Secs:
+enum EntityStatus:
+  case Spawned, Alive, Despawned
+
+trait Secs[SS <: Tuple>]:
   type Worldly = World ?=> Unit
   def init(): Worldly
   def tick(time: Double): Worldly
   def beforeRender(): Unit
-  def renderEntity(entity: Entity, components: Components): Unit
+  def renderEntity(
+      entity: Entity,
+      status: EntityStatus,
+      components: Components,
+      previousComponents: => Components
+  ): Unit
   def afterRender(): Unit
 ```
 
@@ -149,7 +157,7 @@ trait Secs:
 
 `beforeRender()` and `afterRender()` are also called on every animation frame.  Both are called after `tick()` and sandwich calls to `renderEntity()` in between.  Things that require rendering on every frame, like erasing the background, are done in `beforeRender()`.
 
-`renderEntity()` is called once for each entity in the system on every frame.  The `entity` parameter is the entity that's rendering and the `components` parameter has methods to query components of that entity.
+`renderEntity()` is called once for each entity having the status specified in the generic parameter of `Secs` in the system on every frame.  The `entity` parameter is the entity that's rendering, `status` is its status, the `components` parameter has methods to query components of that entity and the `previousComponents` parameter can be used to access components of the previous frame cycle.
 
 ```scala
 trait Components:
