@@ -2,7 +2,7 @@ package secs.examples.retained
 
 import org.scalajs.dom
 import org.scalajs.dom.*
-import secs.*
+import secs.{*, given}
 
 object Retained:
   def setup(width: Int, height: Int): html.Canvas =
@@ -16,7 +16,7 @@ object Retained:
     val canvas = setup(800, 600)
     val secs = RetainedSecs(canvas)
     val ticker = Secs.start(secs)
-    val animateFrame: () => Unit = () =>
+    lazy val animateFrame: () => Unit = () =>
       dom.window.requestAnimationFrame(time =>
         ticker(time)
         animateFrame()
