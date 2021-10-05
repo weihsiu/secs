@@ -14,11 +14,7 @@ object Retained:
 
   def main(args: Array[String]): Unit =
     val canvas = setup(800, 600)
-    val secs = RetainedSecs(canvas)
+    val renderer = threeRenderer(canvas)
+    val secs = RetainedSecs(renderer)
     val ticker = Secs.start(secs)
-    lazy val animateFrame: () => Unit = () =>
-      dom.window.requestAnimationFrame(time =>
-        ticker(time)
-        animateFrame()
-      )
-    animateFrame()
+    renderer.animateFrame(ticker)
