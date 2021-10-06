@@ -45,26 +45,26 @@ lazy val examples = crossProject(JSPlatform, JVMPlatform)
     //     .mainMethod("secs.examples.asteroids.Asteroids", "main")
     // ),
     // Compile / mainClass := Some("secs.examples.asteroids.Asteroids"),
-    Compile / npmDependencies ++= Seq(
-      "three" -> "0.132.2"
-    ),
+    // Compile / npmDependencies ++= Seq(
+    //   "three" -> "0.132.2"
+    // ),
     // webpack plugins to enable turning module imports into globals
     // https://scalacenter.github.io/scalajs-bundler/cookbook.html#global-namespace
-    Compile / npmDevDependencies ++= Seq(
-      "webpack-merge" -> "5.8.0",
-      "imports-loader" -> "3.0.0",
-      "expose-loader" -> "3.0.0"
-    ),
+    // Compile / npmDevDependencies ++= Seq(
+    //   "webpack-merge" -> "5.8.0",
+    //   "imports-loader" -> "3.0.0",
+    //   "expose-loader" -> "3.0.0"
+    // ),
     // custom webpack config file
-    fastOptJS / webpackConfigFile := Some(
-      baseDirectory.value / "my.webpack.config.js"
-    ),
+    // fastOptJS / webpackConfigFile := Some(
+    //   baseDirectory.value / "my.webpack.config.js"
+    // ),
     // faster webpack performance
     webpack / version := "5.54.0",
     webpackBundlingMode := BundlingMode.LibraryOnly(),
     webpackEmitSourceMaps := false,
     libraryDependencies ++= Seq(
-      "org.cascaval" %%% "three-typings" % "0.1.7-SNAPSHOT",
+      "io.github.dcascaval" %%% "scala-threejs-facades" % "0.131.0",
       ("org.scala-js" %%% "scalajs-dom" % "1.2.0").cross(CrossVersion.for3Use2_13)
     )
   )
