@@ -5,7 +5,7 @@ import scala.collection.immutable
 import scala.compiletime.*
 
 enum EntityStatus:
-  case Spawned, Alive, Despawned
+  case Spawned, SpawnedAndAlive, Alive, Despawned
 export EntityStatus.*
 
 trait Components:
@@ -74,6 +74,13 @@ object Secs:
           secs,
           Spawned,
           W.allPreviousEntities().diff(W.allPrevious2Entities())
+        )
+        renderEntities[rest](secs.asInstanceOf[Secs[rest]])
+      case _: (SpawnedAndAlive.type *: rest) =>
+        renderEntitiesWithStatus[SS](
+          secs,
+          SpawnedAndAlive,
+          W.allPreviousEntities()
         )
         renderEntities[rest](secs.asInstanceOf[Secs[rest]])
       case _: (Alive.type *: rest) =>

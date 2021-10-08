@@ -3,7 +3,7 @@ package secs.examples.asteroids
 import secs.{*, given}
 
 class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer)
-    extends Secs[(Spawned.type, Alive.type)]:
+    extends Secs[SpawnedAndAlive.type *: EmptyTuple]:
   val spaceshipSegments = List(
     (10.0, 0.0, -10.0, 5.0),
     (10.0, 0.0, -10.0, -5.0),
