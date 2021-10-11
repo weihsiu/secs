@@ -46,7 +46,8 @@ lazy val examples = crossProject(JSPlatform, JVMPlatform)
     // ),
     Compile / mainClass := Some("secs.examples.retained.Retained"),
     Compile / npmDependencies ++= Seq(
-      "three" -> "0.131.0"
+      "three" -> "0.131.0",
+      "camera-controls" -> "1.33.0"
     ),
     // webpack plugins to enable turning module imports into globals
     // https://scalacenter.github.io/scalajs-bundler/cookbook.html#global-namespace

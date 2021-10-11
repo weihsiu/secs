@@ -2,6 +2,7 @@ package secs.examples.retained
 
 import org.scalajs.dom
 import org.scalajs.dom.*
+import scala.scalajs.js
 import secs.{*, given}
 
 object Retained:
@@ -13,6 +14,7 @@ object Retained:
     canvas
 
   def main(args: Array[String]): Unit =
+    CameraControls.install(js.Dynamic.literal(THREE = THREE))
     val canvas = setup(800, 600)
     val renderer = threeRenderer(canvas)
     val secs = RetainedSecs(renderer)
