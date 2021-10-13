@@ -131,11 +131,11 @@ case class EventReceiver[E]() extends Component:
 Events are great for systems to exchange information that might be cumbersome to do via inserting, querying, and removing components.  Even though systems in SECS are composed of functions and functions compose, using events this way shows our intent clearly and aids in the querying of components as well.
 
 ## Secs
-To tie everything together, we have `Secs`.  It's a trait that every SECS program needs to implement to run.  It has a generic parameter which specifies the entity statuses allowed (we will talk more about it later).  Methods in Secs are lifecycle methods (borrowing a React term) and are called when the occasions arise.
+To tie everything together, we have `Secs`.  It's a trait that every SECS program needs to implement to run.  It has a generic parameter which specifies the entity statuses allowed when renderEntity() is called. Available statuses are `Spawned`(entities that are created in this frame), `SpawnedAndAlive`(entities that are either created in this frame or already alive), `Alive`(entities that are already created in the previous frames), `AliveAndChanged`(entities that are both already alive and their components have changed), and `Despawned`(entities that are destroyed in this frame). Statuses should be in a `Tuple` type and all entities that satisfy the status conditions will be passed when `renderEntity()` is called.  Please note that, in the current implementation, same entity might be passed to `renderEntity()` with different entity statuses since entity statuses are not mutually exclusive.  Methods in Secs are lifecycle methods (borrowing a React term) and are called when the occasions arise.
 
 ```scala
 enum EntityStatus:
-  case Spawned, Alive, Despawned
+  case Spawned, SpawnedAndAlive, Alive, AliveAndChanged, Despawned
 
 trait Secs[SS <: Tuple>]:
   type Worldly = World ?=> Unit
