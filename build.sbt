@@ -1,6 +1,6 @@
 import org.scalajs.linker.interface.ModuleInitializer
 val commonSettings = Seq(
-  scalaVersion := "3.0.2",
+  scalaVersion := "3.1.0",
   version := "0.1.0",
   scalacOptions ++= Seq(
     "-source:future"

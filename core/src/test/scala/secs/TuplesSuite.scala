@@ -20,7 +20,7 @@ class TupleSuite extends munit.FunSuite:
   test("sequenceOptions with Somes") {
     val t1 = (Some(1), Some('a'), Some(true))
     val t2: Option[(Int, Char, Boolean)] = t1.sequenceOptions
-    val Some(i, c, b) = t1.sequenceOptions
+    val Some((i, c, b)) = t1.sequenceOptions
     assertEquals(t2, Some((1, 'a', true)))
     assertEquals(i, 1)
     assertEquals(c, 'a')
