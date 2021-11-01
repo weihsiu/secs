@@ -4,11 +4,12 @@ marp: true
 # Hacking a minimum ECS in Scala 3
 ## 張瑋修 Walter Chang
 ### @weihsiu / weihsiu@gmail.com
-![https://github.com/weihsiu/secs](qrcode.png)
+
+![bg right:33% w:350](qrcode.png)
 https://github.com/weihsiu/secs
 
 ---
-![Scala Taiwan Logo](scalataiwan.png)
+![bg right:33% w:500](scalataiwan.png)
 # Scala Taiwan
 ## [Scala Taiwan gitter channel](https://gitter.im/ScalaTaiwan/ScalaTaiwan)
 ## [Scala Taiwan FB group](https://www.facebook.com/groups/ScalaTW/)
@@ -17,17 +18,162 @@ https://github.com/weihsiu/secs
 ---
 # Agenda
 - What is ECS?
-- 
+- Overview
+- Entity
+- Component
+- System
+- Command
+- Query
+- Filter
+- Event
+- Secs
+- Examples
 - Q&A
 
 ---
 # What is ECS?
-- 
+- "Entity–component–system (ECS) is a software architectural pattern that is mostly used in video game development."  -- Wikipeida
+
+---
+# Overview
+- Scala 3 meta-programming is utilized to make ECS programming simpler and less error-prone
+- Meta-programming in Scala 3 consists of roughly 2 main features:
+  * Typelevel programming
+  * Macros (not used in this project)
+
+---
+# Entity
+- Just an identifier
+- Each entity can have multiple components associated with it
+
+```scala
+opaque type Entity = Int
+```
+
+---
+# Component
+- Just Scala case classes that extend `Component` (marker trait) and derives `ComponentMeta`.
+- Builtin components:
+  * EntityC
+  * Label
+
+```scala
+case class Dimension(width: Double, height: Double) extends Component derives ComponentMeta
+```
+
+---
+# System
+- Just Scala inline functions
+- Used to insert/modify/delete components each entity is associated with
+
+```scala
+inline def updateDimensions(using
+      command: Command,
+      query: Query1[(EntityC, Dimension)]
+  ): Unit = ???
+```
+
+---
+# Command
+- Used to insert/modify/delete components
+- obtained via `using` with system functions
+
+
+```scala
+trait Command:
+  def spawnEntity(): EntityCommand
+  def entity(entity: Entity): EntityCommand
+  def despawnEntity(entity: Entity): Unit
+
+trait EntityCommand:
+  def entity: Entity
+  def insertComponent[C <: Component](component: C)(using CM: ComponentMeta[C]): EntityCommand
+  def updateComponent[C <: Component](update: C => C)(using CM: ComponentMeta[C]): EntityCommand
+  def removeComponent[C <: Component]()(using CM: ComponentMeta[C]): EntityCommand
+
+```
+
+---
+# Query
+- Used to select entities with required components
+- obtained via `using` with system functions
+
+
+```scala
+trait Query[CS <: Tuple, OS <: BoolOps]:
+  inline def result: List[CS]
+```
+
+```scala
+inline def updateSpaceship(time: Double)(using
+      C: Command,
+      Q: Query1[(EntityC, Direction, Movement, Option[CoolOff])]
+  ): Unit =
+    Q.result.foreach((e, d, m, cO) =>
+      // e: EntityC
+      // d: Direction
+      // m: Movement
+      // cO: Option[CoolOff]
+      ???
+    )
+```
+
+---
+# Filter
+- Used to select entities that meet the filtering criteria
+- Specified in the second generic parameter of Query
+
+```scala
+inline def system(using Q: Query[EntityC *: EmptyTuple, Dimension ∧ Added[Rotation]]): Unit = ???
+```
+
+---
+# Event
+- Builtin components with functions to send and receive events
+
+
+```scala
+case class EventSender[E]() extends Component:
+  def send(event: E)(using CM: ComponentMeta[EventSender[E]], W: World): Unit = W.sendEvent(event)
+
+case class EventReceiver[E]() extends Component:
+  def receive(using CM: ComponentMeta[EventSender[E]], W: World): Iterable[E] = W.receiveEvents
+```
+
+---
+# Secs
+- To tie everything together, implement `Secs`
+
+```scala
+enum EntityStatus:
+  case Spawned, SpawnedAndAlive, Alive, AliveAndChanged, Despawned
+
+trait Secs[SS <: Tuple>]:
+  type Worldly = World ?=> Unit
+  def init(): Worldly
+  def tick(time: Double): Worldly
+  def beforeRender(): Unit
+  def renderEntity(
+      entity: Entity,
+      status: EntityStatus,
+      components: Components,
+      previousComponents: => Components
+  ): Unit
+  def afterRender(): Unit
+```
+
+---
+# Examples
+- Astroids
+  * As an Java app
+  * As a browser page
+- Retained
+  * retained mode operation
 
 ---
 # Q&A
 ## That's all and thank you for your attention
-![https://github.com/weihsiu/secs](qrcode.png)
+![bg right:33% w:350](qrcode.png)
 https://github.com/weihsiu/secs
 
 
