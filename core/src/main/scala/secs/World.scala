@@ -80,43 +80,51 @@ given World with
   def despawnEntity(entity: Entity) =
     entities
       .get(entity)
-      .foreach(_.keys.foreach { cm =>
-        components = components.updatedWith(cm)(_.flatMap { es =>
-          val es1 = es - entity
-          Option.when(es1.nonEmpty)(es1)
-        })
-      })
+      .foreach(
+        _.keys.foreach(cm =>
+          components = components.updatedWith(cm)(_.flatMap(es =>
+            val es1 = es - entity
+            Option.when(es1.nonEmpty)(es1)
+          ))
+        )
+      )
     entities -= entity
 
   def insertComponent[C <: Component](entity: Entity, component: C)(using
       CM: ComponentMeta[C]
   ) =
-    entities.get(entity).foreach { cs =>
-      entities += entity -> (cs + (CM -> component))
-      components = components.updatedWith(CM)(
-        _.fold(Some(Set(entity)))(es => Some(es + entity))
+    entities
+      .get(entity)
+      .foreach(cs =>
+        entities += entity -> (cs + (CM -> component))
+        components = components.updatedWith(CM)(
+          _.fold(Some(Set(entity)))(es => Some(es + entity))
+        )
       )
-    }
 
   def updateComponent[C <: Component](entity: Entity, update: C => C)(using
       CM: ComponentMeta[C]
   ) =
-    entities.get(entity).foreach { cs =>
-      entities += entity -> cs.updatedWith(CM)(
-        _.map(update.asInstanceOf[Component => Component])
+    entities
+      .get(entity)
+      .foreach(cs =>
+        entities += entity -> cs.updatedWith(CM)(
+          _.map(update.asInstanceOf[Component => Component])
+        )
       )
-    }
 
   def removeComponent[C <: Component](
       entity: Entity
   )(using CM: ComponentMeta[C]) =
-    entities.get(entity).foreach { cs =>
-      entities += entity -> (cs - CM)
-      components = components.updatedWith(CM)(_.flatMap { es =>
-        val es1 = es - entity
-        Option.when(es1.nonEmpty)(es1)
-      })
-    }
+    entities
+      .get(entity)
+      .foreach(cs =>
+        entities += entity -> (cs - CM)
+        components = components.updatedWith(CM)(_.flatMap(es =>
+          val es1 = es - entity
+          Option.when(es1.nonEmpty)(es1)
+        ))
+      )
 
   def sendEvent[E](event: E)(using CM: ComponentMeta[EventSender[E]]) =
     events = events.updatedWith(CM)(
