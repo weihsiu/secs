@@ -14,14 +14,14 @@ enum KeyCode(val value: FxKeyCode):
   case Right extends KeyCode(FxKeyCode.Right)
   case Down extends KeyCode(FxKeyCode.Down)
 
-def scalafxKeyboard(scene: Scene): Keyboard = new Keyboard:
+def scalafxKeyboard(scene: Scene): Keyboard = new:
   private var downKeys = Set.empty[FxKeyCode]
   scene.onKeyPressed = e => downKeys += e.getCode
   scene.onKeyReleased = e => downKeys -= e.getCode
 
   def keyDown(keyCode: KeyCode): Boolean = downKeys(keyCode.value)
 
-def scalafxRenderer(context: GraphicsContext): Renderer = new Renderer:
+def scalafxRenderer(context: GraphicsContext): Renderer = new:
   val width = context.getCanvas.getWidth
 
   val height = context.getCanvas.getHeight
