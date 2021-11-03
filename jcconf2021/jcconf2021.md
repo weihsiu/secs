@@ -143,6 +143,8 @@ case class EventReceiver[E]() extends Component:
 ---
 # Secs
 - To tie everything together, implement `Secs`
+- In init(), call system functions that will only be called in the very beginning
+- In tick(), call system functions that will be invoke on every rendering frame
 
 ```scala
 enum EntityStatus:
