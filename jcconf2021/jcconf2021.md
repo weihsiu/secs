@@ -34,6 +34,15 @@ https://github.com/weihsiu/secs
 # What is ECS?
 - "Entity–component–system (ECS) is a software architectural pattern that is mostly used in video game development."  -- Wikipeida
 
+
+---
+From https://medium.com/@clevyr/entity-component-system-for-react-js-e3ab6e9be776
+![](https://miro.medium.com/max/1000/1*yoLxDyQoFzC0je_oHkcppw.png)
+
+---
+From https://medium.com/@clevyr/entity-component-system-for-react-js-e3ab6e9be776
+![](https://miro.medium.com/max/1400/1*BYLoJ0PD-t1dPr6vDxajwg.png)
+
 ---
 # Overview
 - Scala 3 meta-programming is utilized to make ECS programming simpler and less error-prone
