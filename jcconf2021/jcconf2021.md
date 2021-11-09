@@ -48,6 +48,9 @@ From https://medium.com/@clevyr/entity-component-system-for-react-js-e3ab6e9be77
 - Scala 3 meta-programming is utilized to make ECS programming simpler and less error-prone
 - Meta-programming in Scala 3 consists of roughly 2 main features:
   * Typelevel programming
+    - Match types
+    - scala.compiletime package
+  * Inline functions
   * Macros (not used in this project)
 
 ---
@@ -179,7 +182,7 @@ trait Secs[SS <: Tuple>]:
   * As an Java app
   * As a browser page
 - Retained
-  * retained mode operation
+  * retained mode operations
 
 ---
 # Q&A
