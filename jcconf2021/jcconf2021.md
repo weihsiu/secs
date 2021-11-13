@@ -2,10 +2,11 @@
 marp: true
 ---
 # Hacking a minimum ECS in Scala 3
+
 ## 張瑋修 Walter Chang
 ### @weihsiu / weihsiu@gmail.com
 
-![bg right:33% w:350](qrcode.png)
+![bg right:30% w:350](qrcode.png)
 https://github.com/weihsiu/secs
 
 ---
@@ -33,7 +34,7 @@ https://github.com/weihsiu/secs
 ---
 # What is ECS?
 - "Entity–component–system (ECS) is a software architectural pattern that is mostly used in video game development."  -- Wikipeida
-
+- It makes manipulating entities with the same types of components (attributes) very simple.
 
 ---
 From https://medium.com/@clevyr/entity-component-system-for-react-js-e3ab6e9be776
@@ -46,7 +47,7 @@ From https://medium.com/@clevyr/entity-component-system-for-react-js-e3ab6e9be77
 ---
 # Overview
 - Scala 3 meta-programming is utilized to make ECS programming simpler and less error-prone
-- Meta-programming in Scala 3 consists of roughly 2 main features:
+- Meta-programming in Scala 3 is made out of the following features:
   * Typelevel programming
     - Match types
     - scala.compiletime package
@@ -142,7 +143,7 @@ inline def system(using Q: Query[EntityC *: EmptyTuple, Dimension ∧ Added[Rota
 ---
 # Event
 - Builtin components with functions to send and receive events
-
+- Events are produced and consumed all in a single frame
 
 ```scala
 case class EventSender[E]() extends Component:
@@ -187,7 +188,7 @@ trait Secs[SS <: Tuple>]:
 ---
 # Q&A
 ## That's all and thank you for your attention
-![bg right:33% w:350](qrcode.png)
+![bg right:30% w:350](qrcode.png)
 https://github.com/weihsiu/secs
 
 

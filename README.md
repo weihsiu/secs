@@ -183,7 +183,7 @@ You might see `World` required as a context parameter in some of the APIs.  We w
 ## Example: Asteroids
 I made a simple and incomplete Asteroids game to demonstrate the features of SECS.  It currently runs in the browser using HTML's canvas API for screen rendering and as an application using Scalafx's canvas API.  And coincidentally, both APIs are quite similar!  As the core SECS is cross-built for both Scala and Scala.js, it will work as a library for both JVM and Javascript.  I've abstracted the rendering and input parts of the program so it will be easy to port it to other rendering pipelines if you fancy (WebGL, anyone?).
 
-To run in a browser, `examplesJS/fastLinkJS` in sbt to generate the necessary artifacts, then point your browser to `web/index.html`.
+To run in a browser, make sure the `Compile / mainClass` setting in the JS settings of the examples sub-project in build.sbt is set to `Some(secs.examples.asteroids.Asteroids)`, then run`examplesJS/fastOptJS/webpack` in sbt to generate the necessary artifacts, then point your browser to `web/index.html`.
 
 To run as an application, `examplesJVM/run` in sbt.
 
@@ -203,6 +203,11 @@ Both `TorpedoPoation` and `SpaceshipPosition` events are sent by the `EventSende
 case class TorpedoPosition(entity: Entity, pos: (Double, Double)) derives EventSenderCM, EventReceiverCM
 case class SpaceshipPosition(entity: Entity, pos: (Double, Double)) derives EventSenderCM, EventReceiverCM
 ```
+
+## Example: Retained
+Being able to specify the combination of statuses of rendering entities, we are able to make the rendering work not only in [the immediate mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)), but also in [the retained mode](https://en.wikipedia.org/wiki/Retained_mode).  In order to show the retained mode in action, we use `three.js` which utilizes WebGL underneath as our rendering backend.  In the example, it animates a bunch of rotating 3D cubes and you can use the mouse wheel to zoom in and out, and click-drag to change the viewing position.
+
+To run in a browser, make sure the `Compile / mainClass` setting in the JS settings of the examples sub-project in build.sbt is set to `Some(secs.examples.retained.Retained)`, then run`examplesJS/fastOptJS/webpack` in sbt to generate the necessary artifacts, then point your browser to `web/index.html`.
 
 ## TODO
 * Hierarchical entities
