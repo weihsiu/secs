@@ -118,22 +118,17 @@ trait EntityCommand:
 - All done in compile-time, thanks to type-level programming
 - obtained via `using` with system functions
 
-
 ```scala
 trait Query[CS <: Tuple, OS <: BoolOps]:
   inline def result: List[CS]
 ```
-
 ```scala
 inline def updateSpaceship(time: Double)(using
       C: Command,
       Q: Query1[(EntityC, Direction, Movement, Option[CoolOff])]
   ): Unit =
     Q.result.foreach((e, d, m, cO) =>
-      // e: EntityC
-      // d: Direction
-      // m: Movement
-      // cO: Option[CoolOff]
+      // e: EntityC, d: Direction, m: Movement, cO: Option[CoolOff]
       ???
     )
 ```
