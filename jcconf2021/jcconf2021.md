@@ -145,7 +145,7 @@ inline def updateSpaceship(time: Double)(using
 - Specified in the second generic parameter of Query
 
 ```scala
-inline def system(using Q: Query[EntityC *: EmptyTuple, Dimension ∧ Added[Rotation]]): Unit = ???
+inline def system(using Q: Query[(EntityC, Movement), Dimension ∧ Added[Rotation]]): Unit = ???
 ```
 
 ---
@@ -178,10 +178,8 @@ trait Secs[SS <: Tuple>]:
   def tick(time: Double): Worldly
   def beforeRender(): Unit
   def renderEntity(
-      entity: Entity,
-      status: EntityStatus,
-      components: Components,
-      previousComponents: => Components
+      entity: Entity, status: EntityStatus,
+      components: Components, previousComponents: => Components
   ): Unit
   def afterRender(): Unit
 ```
