@@ -34,7 +34,7 @@ https://github.com/weihsiu/secs
 ---
 # What is ECS?
 - "Entity–component–system (ECS) is a software architectural pattern that is mostly used in video game development."  -- Wikipeida
-- It makes manipulating entities with the same types of components (attributes) very simple.
+- It makes manipulating entities with the same types of components (attributes) very simple
 
 ---
 From https://medium.com/@clevyr/entity-component-system-for-react-js-e3ab6e9be776
@@ -95,7 +95,6 @@ inline def updateDimensions(using
 - In order to manipulate components of an entity, you have to obtain it's `EntityCommand` first
 - obtained via `using` with system functions
 
-
 ```scala
 trait Command:
   def spawnEntity(): EntityCommand
@@ -152,6 +151,7 @@ inline def system(using Q: Query[EntityC *: EmptyTuple, Dimension ∧ Added[Rota
 ---
 # Event
 - Builtin components with functions to send and receive events
+- Useful for communication between system functions`
 - Events are produced and consumed all in a single frame
   * Thus the order of system function invocation matters
 
@@ -169,11 +169,9 @@ case class EventReceiver[E]() extends Component:
 - In init(), call system functions that will only be called in the very beginning
 - In tick(), call system functions that will be invoke on every rendering frame
 - in renderEntity(), every entity that satisfy `EntityStatus` will have a chance to render itself
-
 ```scala
 enum EntityStatus:
   case Spawned, SpawnedAndAlive, Alive, AliveAndChanged, Despawned
-
 trait Secs[SS <: Tuple>]:
   type Worldly = World ?=> Unit
   def init(): Worldly

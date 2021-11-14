@@ -44,6 +44,7 @@ lazy val examples = crossProject(JSPlatform, JVMPlatform)
     //   ModuleInitializer
     //     .mainMethod("secs.examples.asteroids.Asteroids", "main")
     // ),
+    // Compile / mainClass := Some("secs.examples.asteroids.Asteroids"),
     Compile / mainClass := Some("secs.examples.retained.Retained"),
     Compile / npmDependencies ++= Seq(
       "three" -> "0.131.0",
