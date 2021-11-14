@@ -65,7 +65,8 @@ opaque type Entity = Int
 
 ---
 # Component
-- Just Scala case classes that extend `Component` (marker trait) and derives `ComponentMeta`.
+- Just Scala case classes that extend `Component` (marker trait) and derives `ComponentMeta`
+- Immutable
 - Builtin components:
   * EntityC
   * Label
@@ -78,6 +79,7 @@ case class Dimension(width: Double, height: Double) extends Component derives Co
 # System
 - Just Scala inline functions
 - Used to insert/modify/delete components each entity is associated with
+- The order of invoking them is important
 
 ```scala
 inline def updateDimensions(using
@@ -89,6 +91,8 @@ inline def updateDimensions(using
 ---
 # Command
 - Used to insert/modify/delete components
+  * Modify is done by replacing old components with new ones
+- In order to manipulate components of an entity, you have to obtain it's `EntityCommand` first
 - obtained via `using` with system functions
 
 
@@ -109,6 +113,9 @@ trait EntityCommand:
 ---
 # Query
 - Used to select entities with required components
+  * Select entities with required and/or optional components
+  * Refine selection further with `Filter`
+- All done in compile-time, thanks to type-level programming
 - obtained via `using` with system functions
 
 
@@ -134,6 +141,13 @@ inline def updateSpaceship(time: Double)(using
 ---
 # Filter
 - Used to select entities that meet the filtering criteria
+- Component alone is used to signify `contains` relationship
+- `Added[]` and `Changed[]` is used to decorate `Component` to signify `added` and `changed` relationships
+- Boolean operators can be used to form more complicated relationships
+  * `¬` is equivalent to `not`
+  * `∧` is equivalent to `and`
+  * `∨` is equivalent to `or`
+- All done in compile-time, thanks to type-level programming
 - Specified in the second generic parameter of Query
 
 ```scala
@@ -144,6 +158,7 @@ inline def system(using Q: Query[EntityC *: EmptyTuple, Dimension ∧ Added[Rota
 # Event
 - Builtin components with functions to send and receive events
 - Events are produced and consumed all in a single frame
+  * Thus the order of system function invocation matters
 
 ```scala
 case class EventSender[E]() extends Component:
@@ -158,6 +173,7 @@ case class EventReceiver[E]() extends Component:
 - To tie everything together, implement `Secs`
 - In init(), call system functions that will only be called in the very beginning
 - In tick(), call system functions that will be invoke on every rendering frame
+- in renderEntity(), every entity that satisfy `EntityStatus` will have a chance to render itself
 
 ```scala
 enum EntityStatus:
