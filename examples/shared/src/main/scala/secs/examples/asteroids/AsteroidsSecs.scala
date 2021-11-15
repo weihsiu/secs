@@ -223,8 +223,7 @@ class AsteroidsSecs(keyboard: Keyboard, renderer: Renderer)
     Q.result.foreach((e, l, r, m, s) =>
       r.receive.foreach(p =>
         if collide(m.pos, asteroidRadius * s.scale, p.pos, 1) then
-          C.despawnEntity(e.entity)
-          C.despawnEntity(p.entity)
+          C.despawnEntity(e.entity).despawnEntity(p.entity)
           spawnDebris(C, time, m.pos)
           if s.scale > 1.0 then spawnAsteroids(C, s.scale / 2, Some(m.pos))
       )

@@ -99,7 +99,7 @@ inline def updateDimensions(using
 trait Command:
   def spawnEntity(): EntityCommand
   def entity(entity: Entity): EntityCommand
-  def despawnEntity(entity: Entity): Unit
+  def despawnEntity(entity: Entity): Command
 
 trait EntityCommand:
   def entity: Entity

@@ -3,7 +3,7 @@ package secs
 trait Command:
   def spawnEntity(): EntityCommand
   def entity(entity: Entity): EntityCommand
-  def despawnEntity(entity: Entity): Unit
+  def despawnEntity(entity: Entity): Command
 
 trait EntityCommand:
   def entity: Entity
@@ -23,15 +23,17 @@ object Command:
       def updateComponent[C <: Component](update: C => C)(using CM: ComponentMeta[C]) =
         W.updateComponent(e, update)
         this
-        
+
       def removeComponent[C <: Component]()(using CM: ComponentMeta[C]) =
         W.removeComponent[C](e)
         this
-        
+
     def spawnEntity() =
       val entity = W.spawnEntity()
       entityCommand(entity)
 
     def entity(entity: Entity) = entityCommand(entity)
 
-    def despawnEntity(entity: Entity) = W.despawnEntity(entity)
+    def despawnEntity(entity: Entity) =
+      W.despawnEntity(entity)
+      this
