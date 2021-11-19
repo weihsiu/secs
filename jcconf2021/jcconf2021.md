@@ -19,6 +19,7 @@ https://github.com/weihsiu/secs
 ---
 # Agenda
 - What is ECS?
+- Example #1
 - Overview
 - Entity
 - Component
@@ -28,7 +29,7 @@ https://github.com/weihsiu/secs
 - Filter
 - Event
 - Secs
-- Examples
+- Example #2
 - Q&A
 
 ---
@@ -43,6 +44,12 @@ From https://medium.com/@clevyr/entity-component-system-for-react-js-e3ab6e9be77
 ---
 From https://medium.com/@clevyr/entity-component-system-for-react-js-e3ab6e9be776
 ![](https://miro.medium.com/max/1400/1*BYLoJ0PD-t1dPr6vDxajwg.png)
+
+---
+# Example #1
+- Astroids
+  * As an Java app
+  * As a browser page
 
 ---
 # Overview
@@ -185,10 +192,7 @@ trait Secs[SS <: Tuple>]:
 ```
 
 ---
-# Examples
-- Astroids
-  * As an Java app
-  * As a browser page
+# Example #2
 - Retained
   * retained mode operations
 

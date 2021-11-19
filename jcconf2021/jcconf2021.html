@@ -26,6 +26,7 @@
 <h1>Agenda</h1>
 <ul>
 <li>What is ECS?</li>
+<li>Example #1</li>
 <li>Overview</li>
 <li>Entity</li>
 <li>Component</li>
@@ -35,7 +36,7 @@
 <li>Filter</li>
 <li>Event</li>
 <li>Secs</li>
-<li>Examples</li>
+<li>Example #2</li>
 <li>Q&amp;A</li>
 </ul>
 </section>
@@ -54,7 +55,18 @@
 <p>From <a href="https://medium.com/@clevyr/entity-component-system-for-react-js-e3ab6e9be776">https://medium.com/@clevyr/entity-component-system-for-react-js-e3ab6e9be776</a><br />
 <img src="https://miro.medium.com/max/1400/1*BYLoJ0PD-t1dPr6vDxajwg.png" alt="" /></p>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-marpit-fragments="3">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-marpit-fragments="2">
+<h1>Example #1</h1>
+<ul>
+<li>Astroids
+<ul>
+<li data-marpit-fragment="1">As an Java app</li>
+<li data-marpit-fragment="2">As a browser page</li>
+</ul>
+</li>
+</ul>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-marpit-fragments="3">
 <h1>Overview</h1>
 <ul>
 <li>Scala 3 meta-programming is utilized to make ECS programming simpler and less error-prone</li>
@@ -72,7 +84,7 @@
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9">
 <h1>Entity</h1>
 <ul>
 <li>Just an identifier</li>
@@ -81,7 +93,7 @@
 <pre><code class="language-scala"><svg data-marp-fitting="svg" data-marp-fitting-code><foreignObject><span data-marp-fitting-svg-content><span data-marp-fitting-svg-content-wrap>opaque <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Entity</span> </span>= <span class="hljs-type">Int</span>
 </span></span></foreignObject></svg></code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-marpit-fragments="2">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-marpit-fragments="2">
 <h1>Component</h1>
 <ul>
 <li>Just Scala case classes that extend <code>Component</code> (marker trait) and derives <code>ComponentMeta</code></li>
@@ -96,7 +108,7 @@
 <pre><code class="language-scala"><svg data-marp-fitting="svg" data-marp-fitting-code><foreignObject><span data-marp-fitting-svg-content><span data-marp-fitting-svg-content-wrap><span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Dimension</span>(<span class="hljs-params">width: <span class="hljs-type">Double</span>, height: <span class="hljs-type">Double</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span> <span class="hljs-title">derives</span> <span class="hljs-title">ComponentMeta</span></span>
 </span></span></foreignObject></svg></code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11">
 <h1>System</h1>
 <ul>
 <li>Just Scala inline functions</li>
@@ -109,7 +121,7 @@
   ): <span class="hljs-type">Unit</span> = ???
 </span></span></foreignObject></svg></code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-marpit-fragments="1">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-marpit-fragments="1">
 <h1>Command</h1>
 <ul>
 <li>Used to insert/modify/delete components
@@ -123,7 +135,7 @@
 <pre><code class="language-scala"><svg data-marp-fitting="svg" data-marp-fitting-code><foreignObject><span data-marp-fitting-svg-content><span data-marp-fitting-svg-content-wrap><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Command</span></span>:
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">spawnEntity</span></span>(): <span class="hljs-type">EntityCommand</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">entity</span></span>(entity: <span class="hljs-type">Entity</span>): <span class="hljs-type">EntityCommand</span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">despawnEntity</span></span>(entity: <span class="hljs-type">Entity</span>): <span class="hljs-type">Unit</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">despawnEntity</span></span>(entity: <span class="hljs-type">Entity</span>): <span class="hljs-type">Command</span>
 
 <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">EntityCommand</span></span>:
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">entity</span></span>: <span class="hljs-type">Entity</span>
@@ -133,7 +145,7 @@
 
 </span></span></foreignObject></svg></code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-marpit-fragments="2">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-marpit-fragments="2">
 <h1>Query</h1>
 <ul>
 <li>Used to select entities with required components
@@ -158,7 +170,7 @@
     )
 </span></span></foreignObject></svg></code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-marpit-fragments="3">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-marpit-fragments="3">
 <h1>Filter</h1>
 <ul>
 <li>Used to select entities that meet the filtering criteria</li>
@@ -174,10 +186,10 @@
 <li>All done in compile-time, thanks to type-level programming</li>
 <li>Specified in the second generic parameter of Query</li>
 </ul>
-<pre><code class="language-scala"><svg data-marp-fitting="svg" data-marp-fitting-code><foreignObject><span data-marp-fitting-svg-content><span data-marp-fitting-svg-content-wrap>inline <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">system</span></span>(using <span class="hljs-type">Q</span>: <span class="hljs-type">Query</span>[<span class="hljs-type">EntityC</span> *: <span class="hljs-type">EmptyTuple</span>, <span class="hljs-type">Dimension</span> ∧ <span class="hljs-type">Added</span>[<span class="hljs-type">Rotation</span>]]): <span class="hljs-type">Unit</span> = ???
+<pre><code class="language-scala"><svg data-marp-fitting="svg" data-marp-fitting-code><foreignObject><span data-marp-fitting-svg-content><span data-marp-fitting-svg-content-wrap>inline <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">system</span></span>(using <span class="hljs-type">Q</span>: <span class="hljs-type">Query</span>[(<span class="hljs-type">EntityC</span>, <span class="hljs-type">Movement</span>), <span class="hljs-type">Dimension</span> ∧ <span class="hljs-type">Added</span>[<span class="hljs-type">Rotation</span>]]): <span class="hljs-type">Unit</span> = ???
 </span></span></foreignObject></svg></code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-marpit-fragments="1">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-marpit-fragments="1">
 <h1>Event</h1>
 <ul>
 <li>Builtin components with functions to send and receive events</li>
@@ -195,7 +207,7 @@
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">receive</span></span>(using <span class="hljs-type">CM</span>: <span class="hljs-type">ComponentMeta</span>[<span class="hljs-type">EventSender</span>[<span class="hljs-type">E</span>]], <span class="hljs-type">W</span>: <span class="hljs-type">World</span>): <span class="hljs-type">Iterable</span>[<span class="hljs-type">E</span>] = <span class="hljs-type">W</span>.receiveEvents
 </span></span></foreignObject></svg></code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16">
 <h1>Secs</h1>
 <ul>
 <li>To tie everything together, implement <code>Secs</code></li>
@@ -211,31 +223,23 @@
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">tick</span></span>(time: <span class="hljs-type">Double</span>): <span class="hljs-type">Worldly</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">beforeRender</span></span>(): <span class="hljs-type">Unit</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">renderEntity</span></span>(
-      entity: <span class="hljs-type">Entity</span>,
-      status: <span class="hljs-type">EntityStatus</span>,
-      components: <span class="hljs-type">Components</span>,
-      previousComponents: =&gt; <span class="hljs-type">Components</span>
+      entity: <span class="hljs-type">Entity</span>, status: <span class="hljs-type">EntityStatus</span>,
+      components: <span class="hljs-type">Components</span>, previousComponents: =&gt; <span class="hljs-type">Components</span>
   ): <span class="hljs-type">Unit</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">afterRender</span></span>(): <span class="hljs-type">Unit</span>
 </span></span></foreignObject></svg></code></pre>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-marpit-fragments="3">
-<h1>Examples</h1>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17" data-marpit-fragments="1">
+<h1>Example #2</h1>
 <ul>
-<li>Astroids
-<ul>
-<li data-marpit-fragment="1">As an Java app</li>
-<li data-marpit-fragment="2">As a browser page</li>
-</ul>
-</li>
 <li>Retained
 <ul>
-<li data-marpit-fragment="3">retained mode operations</li>
+<li data-marpit-fragment="1">retained mode operations</li>
 </ul>
 </li>
 </ul>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section data-marpit-advanced-background="background" data-marpit-advanced-background-split="right" style="--marpit-advanced-background-split:30%;"><div data-marpit-advanced-background-container="true" data-marpit-advanced-background-direction="horizontal"><figure style="background-image:url(&quot;qrcode.png&quot;);background-size:350px auto;"></figure></div></section></foreignObject><foreignObject width="70%" height="720"><section id="17" data-marpit-advanced-background="content" data-marpit-advanced-background-split="right" style="--marpit-advanced-background-split:30%;">
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section data-marpit-advanced-background="background" data-marpit-advanced-background-split="right" style="--marpit-advanced-background-split:30%;"><div data-marpit-advanced-background-container="true" data-marpit-advanced-background-direction="horizontal"><figure style="background-image:url(&quot;qrcode.png&quot;);background-size:350px auto;"></figure></div></section></foreignObject><foreignObject width="70%" height="720"><section id="18" data-marpit-advanced-background="content" data-marpit-advanced-background-split="right" style="--marpit-advanced-background-split:30%;">
 <h1>Q&amp;A</h1>
 <h2>That's all and thank you for your attention</h2>
 <p><br />
