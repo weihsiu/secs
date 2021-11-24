@@ -40,27 +40,12 @@ lazy val examples = crossProject(JSPlatform, JVMPlatform)
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
   .jsSettings(
     scalaJSUseMainModuleInitializer := true,
-    // Compile / scalaJSMainModuleInitializer := Some(
-    //   ModuleInitializer
-    //     .mainMethod("secs.examples.asteroids.Asteroids", "main")
-    // ),
-    // Compile / mainClass := Some("secs.examples.asteroids.Asteroids"),
-    Compile / mainClass := Some("secs.examples.retained.Retained"),
+    Compile / mainClass := Some("secs.examples.asteroids.Asteroids"),
+    // Compile / mainClass := Some("secs.examples.retained.Retained"),
     Compile / npmDependencies ++= Seq(
       "three" -> "0.131.0",
       "camera-controls" -> "1.33.0"
     ),
-    // webpack plugins to enable turning module imports into globals
-    // https://scalacenter.github.io/scalajs-bundler/cookbook.html#global-namespace
-    // Compile / npmDevDependencies ++= Seq(
-    //   "webpack-merge" -> "5.8.0",
-    //   "imports-loader" -> "3.0.0",
-    //   "expose-loader" -> "3.0.0"
-    // ),
-    // custom webpack config file
-    // fastOptJS / webpackConfigFile := Some(
-    //   baseDirectory.value / "my.webpack.config.js"
-    // ),
     // faster webpack performance
     webpack / version := "5.54.0",
     webpackBundlingMode := BundlingMode.LibraryOnly(),
